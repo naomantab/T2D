@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Population Stats</title>
+</head>
+<body>
+    <h1>Population Data</h1>
+    {% if stats %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Population Name</th>
+                    <th>Statistics</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for stat in stats %}
+                <tr>
+                    <td>{{ stat.population_name }}</td>
+                    <td>{{ stat.statistics }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No population data found.</p>
+    {% endif %}
+</body>
+</html>
