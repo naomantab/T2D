@@ -74,3 +74,5 @@ def get_snp(rsid):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# test comment
