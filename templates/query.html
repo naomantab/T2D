@@ -26,6 +26,7 @@
           </ul>
         </div>
       </nav>
+      <br><br>
       <div class="container-fluid">
         <h1>Search SNPs</h1>
         <div class="box">
@@ -34,19 +35,44 @@
         </div>
         <form action="/query" method="post">
           <div>
-              <label for="query">Enter rsid:</label>
+              <label for="query">Enter SNP rs-value:</label>
               <input type="text" id="query1" name="query1">
           </div>
           <div>
-              <label for="query">Enter mapped gene name:</label>
+              <label for="query">Enter genomic postion/coordinate:</label>
               <input type="text" id="query2" name="query2">
           </div>
           <div>
-              <label for="query">Enter genomic postion/coordinate:</label>
+              <label for="query">Enter mapped gene name:</label>
               <input type="text" id="query3" name="query3">
           </div>
           <div>
               <button type="submit">Search</button>
+          </div>
+          <br><br>
+          <form method="POST">
+        </form>
+          <div class="container-fluid">
+            <h1>Search Results</h1> {% if snps %} <table class="table table-striped">
+              <thead class="thead-dark">
+                <tr>
+                  <th scope="col">SNP RS-Value</th>
+                  <th scope="col">Genomic Position/Coordinate</th>
+                  <th scope="col">Mapped Gene Name</th>
+                  <th scope="col">P Value</th>
+                  <th scope="col">Phenotype</th>
+                  <th scope="col">Population</th>
+                </tr>
+              </thead>
+              <tbody> {% for snp in snps %} <tr>
+                  <td>{{ snp.rs_value }}</td>
+                  <td>{{ snp.gene_pos }}</td>
+                  <td>{{ snp.mapped_gene }}</td>
+                  <td>{{ snp.snp_p_value }}</td>
+                  <td>{{ snp.snp_phenotype }}</td>
+                  <td>{{ snp.snp_population }}</td>
+                </tr> {% endfor %} </tbody>
+            </table> {% else %} <p>No results found.</p> {% endif %}
           </div>
         </form>
       </div>

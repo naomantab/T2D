@@ -11,8 +11,8 @@ db = SQLAlchemy(app)
 class SNP(db.Model):
     # id = db.Column(db.Integer)
     rs_value = db.Column('SNPS',db.String(100), unique=True, primary_key=True)
-    mapped_gene = db.Column('MAPPED_GENE',db.String(100), nullable=True)
     gene_pos = db.Column('CHR_POS',db.Integer, unique=True)
+    mapped_gene = db.Column('MAPPED_GENE',db.String(100), nullable=True)
     snp_p_value = db.Column('P-VALUE',db.Float, nullable=True)
     snp_phenotype = db.Column('DISEASE/TRAIT',db.Float, nullable=True)
     snp_population = db.Column('INITIAL SAMPLE SIZE',db.Float, nullable=True)
@@ -35,18 +35,16 @@ def index():
 # SNP query page
 @app.route('/query/', methods=['GET', 'POST'])
 def query():
-    if request.method == 'POST':
-        # grab data from 3 fields
-        query1 = request.form['query1']
-        query2 = request.form['query2']
-        query3 = request.form['query3']
-        # query the SQL file, and filter to specifications
-        snps = SNP.query.filter((SNP.rs_value == query1) | (SNP.mapped_gene == query2) | (SNP.gene_pos == query3)).all()
-        # return the query output
-        return render_template("query_result.html", snps=snps)
+    snps = None  # Default value when the page is first loaded
 
-    # Render query form, "GET" method
-    return render_template("query.html")
+    if request.method == 'POST':
+        query1 = request.form.get('query1', '')
+        query2 = request.form.get('query2', '')
+        query3 = request.form.get('query3', '')
+        # Search query only if at least one input is filled
+        snps = SNP.query.filter((SNP.rs_value == query1) | (SNP.gene_pos == query2) | (SNP.mapped_gene == query3)).all()
+
+    return render_template("query.html", snps=snps)
 
 
 # ignore the code below, still in production
