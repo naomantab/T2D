@@ -4,25 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search SNPs</title>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
 <body>
-    <h1>Search SNPs</h1>
-    <form action="/query" method="post">
-        <div>
-            <label for="query">Enter rsid:</label>
-            <input type="text" id="query1" name="query1">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
+        <a class="navbar-brand" href="#">T2D Jammy Jellyfish</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item ">
+              <a class="nav-link" href="/">Home </span></a>
+            </li>
+            <li class="nav-item active">
+              <a class="nav-link" href="/query">Query <span class="sr-only">(current)</a>
+            </li>
+          </ul>
         </div>
-        <div>
-            <label for="query">Enter mapped gene name:</label>
-            <input type="text" id="query2" name="query2">
+      </nav>
+      <div class="container-fluid">
+        <h1>Search SNPs</h1>
+        <div class="box">
+          Please enter any known information on the SNP of interest
+          <br><br>
         </div>
-        <div>
-            <label for="query">Enter genomic postion/coordinate:</label>
-            <input type="text" id="query3" name="query3">
-        </div>
-        <div>
-            <button type="submit">Search</button>
-        </div>
-    </form>
+        <form action="/query" method="post">
+          <div>
+              <label for="query">Enter rsid:</label>
+              <input type="text" id="query1" name="query1">
+          </div>
+          <div>
+              <label for="query">Enter mapped gene name:</label>
+              <input type="text" id="query2" name="query2">
+          </div>
+          <div>
+              <label for="query">Enter genomic postion/coordinate:</label>
+              <input type="text" id="query3" name="query3">
+          </div>
+          <div>
+              <button type="submit">Search</button>
+          </div>
+        </form>
+      </div>
 </body>
 </html>

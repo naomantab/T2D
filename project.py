@@ -10,9 +10,12 @@ db = SQLAlchemy(app)
 
 class SNP(db.Model):
     # id = db.Column(db.Integer)
-    SNPS = db.Column(db.String(100), unique=True, primary_key=True)
-    MAPPED_GENE = db.Column(db.String(100), nullable=True)
-    CHR_POS = db.Column(db.Integer, unique=True)
+    rs_value = db.Column('SNPS',db.String(100), unique=True, primary_key=True)
+    mapped_gene = db.Column('MAPPED_GENE',db.String(100), nullable=True)
+    gene_pos = db.Column('CHR_POS',db.Integer, unique=True)
+    snp_p_value = db.Column('P-VALUE',db.Float, nullable=True)
+    snp_phenotype = db.Column('DISEASE/TRAIT',db.Float, nullable=True)
+    snp_population = db.Column('INITIAL SAMPLE SIZE',db.Float, nullable=True)
 
 class MappedGene(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -38,7 +41,7 @@ def query():
         query2 = request.form['query2']
         query3 = request.form['query3']
         # query the SQL file, and filter to specifications
-        snps = SNP.query.filter((SNP.SNPS == query1) | (SNP.MAPPED_GENE == query2) | (SNP.CHR_POS == query3)).all()
+        snps = SNP.query.filter((SNP.rs_value == query1) | (SNP.mapped_gene == query2) | (SNP.gene_pos == query3)).all()
         # return the query output
         return render_template("query_result.html", snps=snps)
 
