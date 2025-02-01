@@ -36,14 +36,12 @@ def index():
 @app.route('/query/', methods=['GET', 'POST'])
 def query():
     snps = None  # Default value when the page is first loaded
-
     if request.method == 'POST':
         query1 = request.form.get('query1', '')
         query2 = request.form.get('query2', '')
         query3 = request.form.get('query3', '')
         # Search query only if at least one input is filled
         snps = SNP.query.filter((SNP.rs_value == query1) | (SNP.gene_pos == query2) | (SNP.mapped_gene == query3)).all()
-
     return render_template("query.html", snps=snps)
 
 
