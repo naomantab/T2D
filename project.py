@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 # below give link to database on cloud
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.expanduser('~/Downloads/data.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.abspath('database.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
