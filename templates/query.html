@@ -9,7 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
 </head>
-<body>
+<style>
+body{background-color:whitesmoke;}>
+</style> 
     <nav class="navbar navbar-expand-lg navbar-dark bg-success">
         <a class="navbar-brand" href="#">T2D Jammy Jellyfish</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -37,15 +39,15 @@
         <form action="/query" method="post">
           <div>
               <label for="query">Enter SNP rs-value:</label>
-              <input type="text" id="query1" name="query1">
+              <input type="text" id="query1" name="query1" value="{{request.form.get('query1','')}}">
           </div>
           <div>
               <label for="query">Enter genomic postion/coordinate:</label>
-              <input type="text" id="query2" name="query2">
+              <input type="text" id="query2" name="query2"value="{{request.form.get('query2','')}}">
           </div>
           <div>
               <label for="query">Enter mapped gene name:</label>
-              <input type="text" id="query3" name="query3">
+              <input type="text" id="query3" name="query3"value="{{request.form.get('query3','')}}">
           </div>
           <div>
               <button type="submit">Search</button>
@@ -53,8 +55,15 @@
           <br><br>
           <form method="POST">
         </form>
+        <style>
+          .container-fluid {
+            margin-top: 20px;
+            width: 100%;
+          }
+        </style>
           <div class="container-fluid">
-            <h1>Search Results</h1> 
+          
+          <h1>Search Results</h1> 
             {% if snps %} 
             <input type="text" id="tableFilter" class="form-control mb-3" placeholder="Add filter here...">
             <table id="snp-table" class="table table-striped">
@@ -89,7 +98,13 @@
               <tbody> {% for snp in snps %} <tr>
                   <td>{{ snp.rs_value }}</td>
                   <td>{{ snp.gene_pos }}</td>
-                  <td>{{ snp.mapped_gene }}</td>
+
+                  <td>
+                    <a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene={{ snp.mapped_gene }}" target="_blank">
+                      {{ snp.mapped_gene }}
+                    </a>
+                    
+                  </td>
                   <td>{{ snp.snp_p_value }}</td>
                   <td>{{ snp.snp_phenotype }}</td>
                   <td>{{ snp.snp_population }}</td>
@@ -98,6 +113,7 @@
             <script src="/static/js/filter2.js"></script>
           </div>
         </form>
+      
       </div>
 </body>
 </html>
