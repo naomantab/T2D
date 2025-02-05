@@ -70,28 +70,28 @@ body{background-color:whitesmoke;}>
               <thead class="thead-dark">
                 <tr>
                   <th scope="col" col-index = 1>SNP RS-Value
-                    <select class="table-filter">
-                        <option value ="all"></option>
+                    <!-- <select class="table-filter">
+                        <option value ="all"></option> -->
                       </th>
                   <th scope="col" col-index = 2>Genomic Position/Coordinate
-                    <select class="table-filter">
-                      <option value ="all"></option>
+                    <!-- <select class="table-filter">
+                      <option value ="all"></option> -->
                   </th>
                   <th scope="col" col-index = 3>Mapped Gene Name
-                    <select class="table-filter">
-                      <option value ="all"></option>
+                    <!-- <select class="table-filter">
+                      <option value ="all"></option> -->
                   </th>
                   <th scope="col" col-index = 4>P Value
-                    <select class="table-filter">
-                      <option value ="all"></option>
+                    <!-- <select class="table-filter">
+                      <option value ="all"></option> -->
                   </th>
                   <th scope="col" col-index = 5>Phenotype
-                    <select class="table-filter">
-                      <option value ="all"></option>
+                    <!-- <select class="table-filter">
+                      <option value ="all"></option> -->
                   </th>
                   <th scope="col" col-index = 6>Population
-                    <select class="table-filter">
-                      <option value ="all"></option>
+                    <!-- <select class="table-filter">
+                      <option value ="all"></option> -->
                   </th>
                 </tr>
               </thead>
@@ -110,7 +110,7 @@ body{background-color:whitesmoke;}>
                   <td>{{ snp.snp_population }}</td>
                 </tr> {% endfor %} </tbody>
             </table> {% else %} <p>No results found.</p> {% endif %}
-            <script src="/static/js/filter2.js"></script>
+            <script src="/static/js/filter.js"></script>
           </div>
         </form>
       
