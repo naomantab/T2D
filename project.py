@@ -17,9 +17,9 @@ class SNP(db.Model):
     snp_phenotype = db.Column('DISEASE/TRAIT',db.Float, nullable=True)
     snp_population = db.Column('INITIAL SAMPLE SIZE',db.Float, nullable=True)
 
-class MappedGene(db.Model):
+class Ontology(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), unique=True, nullable=False)
+    ont_mapped_gene = db.Column(db.String(100), unique=True, nullable=False)
     ontology_term = db.Column(db.String(100), nullable=True)
 
 class PopulationData(db.Model):
@@ -46,10 +46,15 @@ def query():
 
 
 # ignore the code below, still in production
-@app.route('/gene/<gene_name>')
-def gene_details(gene_name):
-    gene_info = Gene.query.filter_by(name=gene_name).first()
-    return render_template('gene_details.html', gene=gene_info)
+@app.route('/query/ontology/<mapped_gene>/')
+def ontology(mapped_gene):
+    # ontology_info = ontology.query.filter_by(name=gene_name).first()
+    return render_template('ontology.html', ont_mapped_gene = mapped_gene)
+
+
+
+
+
 
 @app.route('/population', methods=['GET', 'POST'])
 def population():
