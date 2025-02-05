@@ -58,6 +58,6 @@ This project involves the development of a **web-based software tool** to handle
 This project is part of the **MSc Bioinformatics Software Development Group Project 2025**. Special thanks to **Professor Conrad Bessant & Dr Matteo Fumagalli** for guidance.
 
 ## ⚠️ License
-This project is licensed under the MIT License. See `LICENSE` for details.
+N/A for now
 
    
