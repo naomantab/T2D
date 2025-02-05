@@ -55,7 +55,8 @@ This project involves the development of a **web-based software tool** to handle
    flask run  # For Flask
    ```
 ## ⭐ Project Team & Acknowledgments
-This project is part of the **MSc Bioinformatics Software Development Group Project 2025**. Special thanks to **Professor Conrad Bessant & Dr Matteo Fumagalli** for guidance.
+This project is part of the **MSc Bioinformatics Software Development Group Project 2025**. 
+Special thanks to **Professor Conrad Bessant & Dr Matteo Fumagalli** for guidance.
 
 ## ⚠️ License
 N/A for now
