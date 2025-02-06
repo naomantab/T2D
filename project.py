@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 import os
 
@@ -30,7 +30,7 @@ class PopulationData(db.Model):
 # home page
 @app.route('/')
 def index():
-    return render_template("Home_page.html")
+    return render_template("index.html")
 
 # SNP query page
 @app.route('/query/', methods=['GET', 'POST'])
