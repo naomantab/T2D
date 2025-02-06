@@ -4,20 +4,22 @@ import os
 
 app = Flask(__name__)
 # below give link to database on cloud
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.abspath('t2d_database.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.expanduser('~/Downloads/t2d_database.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class SNP(db.Model):
+    __tablename__ = 'SNP_ALL'
     # id = db.Column(db.Integer)
     rs_value = db.Column('SNPS',db.String(100), unique=True, primary_key=True)
     gene_pos = db.Column('CHR_POS',db.Integer, unique=True)
     mapped_gene = db.Column('MAPPED_GENE',db.String(100), nullable=True)
     snp_p_value = db.Column('P-VALUE',db.Float, nullable=True)
     snp_phenotype = db.Column('DISEASE/TRAIT',db.Float, nullable=True)
-    snp_population = db.Column('INITIAL SAMPLE SIZE',db.Float, nullable=True)
+    snp_population = db.Column('General Ancestry',db.Float, nullable=True)
 
 class Ontology(db.Model):
+    __tablename__ = 'ontology_term'
     id = db.Column(db.Integer, primary_key=True)
     ont_mapped_gene = db.Column(db.String(100), unique=True, nullable=False)
     ontology_term = db.Column(db.String(100), nullable=True)
