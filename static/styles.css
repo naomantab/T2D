@@ -68,3 +68,14 @@ body {
 .dark-mode footer {
     background: #1e1e1e;
 }
+.full-height {
+
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 50vh; /* Full viewport height */
+    text-align: center;
+    margin-top: -10vh; /* Moves it up */
+  }
+  
+
