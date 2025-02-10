@@ -52,11 +52,6 @@ def ontology(mapped_gene):
     # ontology_info = ontology.query.filter_by(name=gene_name).first()
     return render_template('ontology.html', ont_mapped_gene = mapped_gene)
 
-
-
-
-
-
 @app.route('/population', methods=['GET', 'POST'])
 def population():
     if request.method == 'POST':
