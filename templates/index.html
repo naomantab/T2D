@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" crossorigin="anonymous">
     
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
     <title>Home | T2D SNP Browser</title>
 </head>
@@ -30,7 +30,7 @@
                 <!-- <img src="{{ url_for('static', filename='logo (15).png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
                 <!-- <img src="{{ url_for('static', filename='static/logo (15).png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
                 <!-- <img src="{{ url_for('static', filename='logo (15).png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
-                <img src="{{ url_for('static', filename='logo (15).png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo">
 
 
                 <!-- <img src="logo.png" alt="T2D Jammy Jellyfish Logo" class="nav-logo"> -->
@@ -53,10 +53,10 @@
         <div class="container text-center text-white">
             <h1 class="display-4">Explore Type 2 Diabetes Genomic Data</h1>
             <p class="lead">Find SNPs, analyze populations, and download reports with ease.</p>
-            <form class="form-inline justify-content-center">
+            <!-- <form class="form-inline justify-content-center">
                 <input type="text" class="form-control form-control-lg w-50" placeholder="Enter SNP ID, Gene Name, or Coordinates" aria-label="SNP Search">
                 <button type="submit" class="btn btn-warning btn-lg ml-2">Search</button>
-            </form>
+            </form> -->
         </div>
     </header>
 
@@ -65,7 +65,7 @@
         <div class="row">
             <div class="col-md-4">
                 <div class="card text-center">
-                    <img src="search-icon.png" class="card-img-top" alt="Search Icon">
+                    <img src="{{ url_for('static', filename='MagnifyingGlass.png') }}" class="card-img-top" alt="Search Icon">
                     <div class="card-body">
                         <h5 class="card-title">Search SNPs</h5>
                         <p class="card-text">Find genetic variants related to Type 2 Diabetes.</p>
@@ -74,7 +74,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card text-center">
-                    <img src="map-icon.png" class="card-img-top" alt="Map Icon">
+                    <img src="{{ url_for('static', filename='Map.png') }}" class="card-img-top" alt="Search Icon">
                     <div class="card-body">
                         <h5 class="card-title">View Population Data</h5>
                         <p class="card-text">Explore genomic variation in different populations.</p>
@@ -83,7 +83,7 @@
             </div>
             <div class="col-md-4">
                 <div class="card text-center">
-                    <img src="download-icon.png" class="card-img-top" alt="Download Icon">
+                    <img src="{{ url_for('static', filename='download.png') }}" class="card-img-top" alt="Search Icon">
                     <div class="card-body">
                         <h5 class="card-title">Download Reports</h5>
                         <p class="card-text">Export SNP summary statistics in CSV or JSON format.</p>
