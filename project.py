@@ -65,7 +65,6 @@ def ontology(mapped_gene):
     # Render the ontology results page
     return render_template('ontology.html', mapped_gene=mapped_gene, ontology_results=ontology_results)
 
-
 @app.route('/population', methods=['GET', 'POST'])
 def population():
     if request.method == 'POST':
