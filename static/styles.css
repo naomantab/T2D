@@ -1,4 +1,4 @@
-/* General Styles */
+/* General Styles */ 
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -68,14 +68,58 @@ body {
 .dark-mode footer {
     background: #1e1e1e;
 }
-.full-height {
 
+.full-height {
     justify-content: center;
     align-items: center;
     flex-direction: column;
     height: 50vh; /* Full viewport height */
     text-align: center;
     margin-top: -10vh; /* Moves it up */
-  }
-  
+}
 
+/* ✅ Added Fixes for Dark Mode Table Visibility */
+
+/* Fix Table Visibility in Dark Mode */
+.dark-mode table {
+    background-color: #1e1e1e; /* Dark table background */
+    color: #ffffff; /* Light text color */
+    border-collapse: collapse;
+    width: 100%;
+}
+
+/* Improve header row in Dark Mode */
+.dark-mode thead {
+    background-color: #333; /* Dark header */
+    color: #ffffff;
+}
+
+/* Improve alternating row colors for readability */
+.dark-mode tbody tr:nth-child(odd) {
+    background-color: #292929; /* Slightly lighter row */
+}
+
+.dark-mode tbody tr:nth-child(even) {
+    background-color: #1e1e1e; /* Slightly darker row */
+}
+
+/* Table Borders */
+.dark-mode th, .dark-mode td {
+    border: 1px solid #ffffff; /* White border for better visibility */
+    padding: 10px;
+}
+
+/* Dark Mode Toggle Button */
+#darkModeBtn {
+    background-color: #fff;
+    color: #000;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.dark-mode #darkModeBtn {
+    background-color: #000;
+    color: #fff;
+}
