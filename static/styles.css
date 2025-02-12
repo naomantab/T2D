@@ -1,4 +1,4 @@
-/* General Styles */ 
+/* General Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -38,7 +38,7 @@ body {
     padding: 8px 12px;
     font-size: 14px;
     border: none;
-    background: #4CAF50;
+    background: #4CAF50; /* Green color for all buttons */
     color: white;
     cursor: pointer;
     border-radius: 5px;
@@ -46,6 +46,16 @@ body {
 }
 
 .accessibility-controls button:hover {
+    background: #45a049;
+}
+
+/* ✅ Fixed Dark Mode Button Color */
+#darkModeBtn {
+    background: #4CAF50; /* Same as font size buttons */
+    color: white;
+}
+
+#darkModeBtn:hover {
     background: #45a049;
 }
 
@@ -69,6 +79,7 @@ body {
     background: #1e1e1e;
 }
 
+/* Full Height Adjustment */
 .full-height {
     justify-content: center;
     align-items: center;
@@ -107,19 +118,4 @@ body {
 .dark-mode th, .dark-mode td {
     border: 1px solid #ffffff; /* White border for better visibility */
     padding: 10px;
-}
-
-/* Dark Mode Toggle Button */
-#darkModeBtn {
-    background-color: #fff;
-    color: #000;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.dark-mode #darkModeBtn {
-    background-color: #000;
-    color: #fff;
 }
