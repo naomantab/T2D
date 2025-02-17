@@ -87,9 +87,11 @@
                   <th scope="col" col-index = 1>SNP RS-Value</th>
                   <th scope="col" col-index = 2>Genomic Position/Coordinate</th>
                   <th scope="col" col-index = 3>Mapped Gene Name</th>
-                  <th scope="col" col-index = 4>P Value</th>
-                  <th scope="col" col-index = 5>Phenotype</th>
-                  <th scope="col" col-index = 6>Population</th>
+                  <th scope="col" col-index = 4>Risk Allele Frequency Mean</th>
+                  <th scope="col" col-index = 5>Risk Allele Frequency Standard Deviation</th>
+                  <th scope="col" col-index = 6>P Value</th>
+                  <th scope="col" col-index = 7>Phenotype</th>
+                  <th scope="col" col-index = 8>Population</th>
                 </tr>
               </thead>
               <tbody> {% for snp in snps %} <tr>
@@ -102,6 +104,8 @@
                     </a>
                     
                   </td>
+                  <td>{{ snp.risk_mean }}</td>
+                  <td>{{ snp.risk_std }}</td>
                   <td>{{ snp.snp_p_value }}</td>
                   <td>{{ snp.snp_phenotype }}</td>
                   <td>{{ snp.snp_population }}</td>

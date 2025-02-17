@@ -61,13 +61,30 @@
         </div>
     </nav>
     <br><br>
-    <div class="container-fluid">
-        <h1>Gene Ontology Results for: {{ mapped_gene }}</h1>
+    <div class="container-fluid full-height">
+        <h1>Gene Ontology: <strong>{{ mapped_gene }}</strong></h1>
         <p>See more details on
             <a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene={{ mapped_gene }}" target="_blank">{{
                 mapped_gene }}</a>.
         </p>
-        <h2>Ontology Results</h2>
+        <br></br>
+        <br></br>
+        <p>
+            Gene Ontology (GO) is a standardized framework for representing gene and gene product attributes across different species
+            <br></br>
+            It provides a structured vocabulary to describe the functions, biological roles, and cellular locations of genes and proteins in a consistent way 
+            <br></br>
+            GO consists of three main categories: 
+            <br></br>
+            <ul>
+            <li>Biological Process (BP): Describes biological objectives or processes, such as "cell cycle" or "signal transduction."</li>
+            <li>Molecular Function (MF): Defines the specific activities of a gene product, such as "ATP binding" or "DNA polymerase activity."</li>
+            <li>Cellular Component (CC): Specifies where in the cell a gene product is active, such as "nucleus" or "mitochondrion."</li>
+            </ul>
+            </pp>
+        <br></br>
+        <br></br>
+        <h2>Results</h2>
         {% if ontology_results %}
         <input type="text" id="tableFilter" class="form-control mb-3" placeholder="Add filter here...">
         <table id="ontology-table" class="table table-striped">

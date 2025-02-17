@@ -34,6 +34,12 @@ class PopulationData(db.Model):
     population_name = db.Column(db.String(100), nullable=False)
     statistics = db.Column(db.String(100), nullable=True)
 
+class SNP_sumstat(db.Model):
+    __tablename__ = 'SNP_STATS'
+    mapped_gene_stats = db.Column('MAPPED_GENE', db.String(100), nullable=True, primary_key=True)
+    risk_mean = db.Column('MEAN_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
+    risk_std = db.Column('STD_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
+
 # home page
 
 
@@ -52,8 +58,11 @@ def query():
         query2 = request.form.get('query2', '')
         query3 = request.form.get('query3', '')
         # Search query only if at least one input is filled
-        snps = SNP.query.filter((SNP.rs_value == query1) | (
-            SNP.gene_pos == query2) | (SNP.mapped_gene == query3)).all()
+        snps = SNP.query.join(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
+            (SNP.rs_value == query1) | 
+            (SNP.gene_pos == query2) | 
+            (SNP.mapped_gene == query3) | 
+            (SNP_sumstat.mapped_gene_stats == query3)).all()
     return render_template("query.html", snps=snps)
 
 
