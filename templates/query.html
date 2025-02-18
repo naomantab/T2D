@@ -65,6 +65,19 @@
               <input type="text" id="query3" name="query3"value="{{request.form.get('query3','')}}">
           </div>
           <div>
+            <label for="query">Choose Population: </label>
+            <input type="text" id="query4" list="populations" name="query4"value="{{request.form.get('query4','')}}">
+            <datalist id="populations">
+              <option value="South Asian">
+              <option value="European">
+              <option value="African">
+              <option value="Hispanic">
+              <option value="East Asian">
+              <option value="Oceanian">
+              <option value="Mixed">
+            </datalist>
+          </div>
+          <div>
               <button type="submit">Search</button>
           </div>
           <br><br>
@@ -87,8 +100,7 @@
                   <th scope="col" col-index = 1>SNP RS-Value</th>
                   <th scope="col" col-index = 2>Genomic Position/Coordinate</th>
                   <th scope="col" col-index = 3>Mapped Gene Name</th>
-                  <th scope="col" col-index = 4>Risk Allele Frequency Mean</th>
-                  <th scope="col" col-index = 5>Risk Allele Frequency Standard Deviation</th>
+                  <th scope="col" col-index = 4>Risk Allele Frequency Mean &#177; Std</th>
                   <th scope="col" col-index = 6>P Value</th>
                   <th scope="col" col-index = 7>Phenotype</th>
                   <th scope="col" col-index = 8>Population</th>
@@ -105,8 +117,7 @@
                     
                   </td>
                 
-                  <td>{{ snp_stat.risk_mean }}</td>
-                  <td>{{ snp_stat.risk_std }}</td>
+                  <td>{{ snp_stat.risk_mean }} &#177; {{ snp_stat.risk_std }}</td>
                   <td>{{ snp.snp_p_value }}</td>
                   <td>{{ snp.snp_phenotype }}</td>
                   <td>{{ snp.snp_population }}</td>

@@ -15,7 +15,7 @@ class SNP(db.Model):
     gene_pos = db.Column('CHR_POS', db.Integer, unique=True)
     mapped_gene = db.Column('MAPPED_GENE', db.String(100), nullable=True)
     snp_p_value = db.Column('P-VALUE', db.Float, nullable=True)
-    snp_phenotype = db.Column('DISEASE/TRAIT', db.Float, nullable=True)
+    snp_phenotype = db.Column('MAPPED_TRAIT', db.Float, nullable=True)
     snp_population = db.Column('General Ancestry', db.Float, nullable=True)
 
 
@@ -54,23 +54,19 @@ def index():
 def query():
     snps = None  # Default value when the page is first loaded
     if request.method == 'POST':
+        # Grab user input
         query1 = request.form.get('query1', '')
         query2 = request.form.get('query2', '')
         query3 = request.form.get('query3', '')
-        # Search query only if at least one input is filled
-        if query1 or query2 or query3:
-            snps = SNP.query.join(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
+        query4 = request.form.get('query4', '')
+            
+        # Join the 2 tables and query using the input
+        if query1 or query2 or query3 or query4:
+            snps = db.session.query(SNP, SNP_sumstat).join(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
                 (SNP.rs_value == query1) | 
                 (SNP.gene_pos == query2) | 
-                (SNP.mapped_gene == query3))
-            if query1 or query2 or query3:
-                snps = db.session.query(SNP, SNP_sumstat).join(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
-                    (SNP.rs_value == query1) | 
-                    (SNP.gene_pos == query2) | 
-                    (SNP.mapped_gene == query3)).all()
-            # Print the first 5 results to the terminal
-                for snp, snp_stat in snps[:5]:
-                 print(f"SNP: {snp.rs_value}, Gene Pos: {snp.gene_pos}, Mapped Gene: {snp.mapped_gene}, Risk Mean: {snp_stat.risk_mean}, Risk Std: {snp_stat.risk_std}")
+                (SNP.snp_population == query4) |
+                (SNP.mapped_gene == query3)).all()
                 
     return render_template("query.html", snps=snps)
 
