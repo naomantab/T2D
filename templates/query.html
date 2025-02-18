@@ -94,7 +94,7 @@
                   <th scope="col" col-index = 8>Population</th>
                 </tr>
               </thead>
-              <tbody> {% for snp in snps %} <tr>
+              <tbody> {% for snp, snp_stat in snps %} <tr>
                   <td>{{ snp.rs_value }}</td>
                   <td>{{ snp.gene_pos }}</td>
 
@@ -104,8 +104,9 @@
                     </a>
                     
                   </td>
-                  <td>{{ snp.risk_mean }}</td>
-                  <td>{{ snp.risk_std }}</td>
+                
+                  <td>{{ snp_stat.risk_mean }}</td>
+                  <td>{{ snp_stat.risk_std }}</td>
                   <td>{{ snp.snp_p_value }}</td>
                   <td>{{ snp.snp_phenotype }}</td>
                   <td>{{ snp.snp_population }}</td>
