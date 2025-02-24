@@ -17,6 +17,7 @@ class SNP(db.Model):
     snp_p_value = db.Column('P-VALUE', db.Float, nullable=True)
     snp_phenotype = db.Column('MAPPED_TRAIT', db.Float, nullable=True)
     snp_population = db.Column('General Ancestry', db.Float, nullable=True)
+    chr_id = db.Column('CHR_ID', db.Integer, nullable=True)
 
 
 class Ontology(db.Model):
@@ -39,6 +40,14 @@ class SNP_sumstat(db.Model):
     mapped_gene_stats = db.Column('MAPPED_GENE', db.String(100), nullable=True, primary_key=True)
     risk_mean = db.Column('MEAN_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
     risk_std = db.Column('STD_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
+
+class plot(db.Model):
+    __tablename__ = 'TAJD_BEB'
+    id = db.Column(db.Integer, primary_key=True) 
+    chrom = db.Column('CHROM', db.Integer, unique=False)
+    bin_start = db.Column('BIN_START', db.Integer, unique= False)
+    tajD = db.Column('TajimaD', db.Integer, nullable=True)
+    sa_pop = db.Column('Population', db.String(50))
 
 # home page
 
@@ -89,17 +98,18 @@ def population():
     return render_template('population.html')
 
 
-@app.route('/visualization')
-def visualization():
+@app.route('/query/visualization/<rs_value>/', methods=['GET', 'POST'])
+def visualization(rs_value):
+    if request.method == 'POST':
+         query5 = request.form.get('query5', '')
+         query6 = request.form.get('query6', '')
+
+         if query5 and query6:
+             plot_q = db.session.query(
+                (plot.sa_pop == query5) & 
+                (plot.gene_pos == query6)).all() 
     return render_template('visualization.html')
 
-
-@app.route('/api/snp/<rsid>', methods=['GET'])
-def get_snp(rsid):
-    snp = SNP.query.filter_by(rsid=rsid).first()
-    if snp:
-        return jsonify({"rsid": snp.rsid, "gene_name": snp.gene_name, "position": snp.position, "p_value": snp.p_value})
-    return jsonify({"error": "SNP not found"}), 404
 
 
 if __name__ == '__main__':
