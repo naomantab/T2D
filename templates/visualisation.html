@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualisation</title>
+</head>
+<body>
+    <h1>Positive Selection Summary Statistics for <strong>{{ rs_value }}</strong></h1>
+    
+    <div class="box">
+        Select South Asian Population and Summary Statistic 
+        <br><br>
+    </div>
+    
+    <!-- Wrap the form with <form> tag -->
+    <form method="post" action="{{ url_for('visualisation', rs_value=rs_value) }}">
+
+        <!-- Population input field -->
+        <div>
+            <label for="query5">Choose Population: </label>
+            <input type="text" id="query5" list="populations" name="query5" value="{{ request.form.get('query5', '') }}">
+            <datalist id="populations">
+                <option value="Bengali in Bangladesh">
+                <option value="Gujarati Indians in Houston, TX">
+                <option value="Indian Telugu in the UK">
+                <option value="Punjabi in Lahore, Pakistan">
+            </datalist>
+        </div>
+
+        <!-- Summary Statistic input field -->
+        <div>
+            <label for="query6">Choose Summary Statistic </label>
+            <input type="text" id="query6" list="stats_type" name="query6" value="{{ request.form.get('query6', '') }}">
+            <datalist id="stats_type">
+                <option value="Tajima's D">
+                <option value="nSL">
+                <option value="iHS">
+            </datalist>
+        </div>
+
+        <!-- Submit button -->
+        <div>
+            <button type="submit">Search</button>
+        </div>
+
+    </form>
+    
+    <!-- Display Visualisation Data -->
+    {% if plot_data %}
+        <h2>Filtered Plot Data</h2>
+        <p>Closest BIN_START: {{ closest_wndw }}</p>
+        <!-- Render plot here if generated or display filtered data -->
+        <ul>
+            {% for data in plot_data %}
+                <li>BIN_START: {{ data.bin_start }}, TajimaD: {{ data.tajD }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
