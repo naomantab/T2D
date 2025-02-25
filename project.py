@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+import matplotlib.pyplot as plt
 
 app = Flask(__name__)
 # below give link to database on cloud
@@ -145,8 +146,6 @@ def visualisation(rs_value):
 
     
     return render_template('visualisation.html', rs_value=rs_value)
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)
