@@ -92,6 +92,7 @@
           <div class="container-fluid">
           
           <h1>Search Results</h1> 
+          <p><strong>Click</strong> on SNP of interest to view <strong> Positive Selection Summary Statistics</strong> in South Asian Populations</p>
             {% if snps %} 
             <input type="text" id="tableFilter" class="form-control mb-3" placeholder="Add filter here...">
             <table id="snp-table" class="table table-striped">
@@ -109,7 +110,7 @@
               </thead>
               <tbody> {% for snp, snp_stat in snps %} <tr>
                   <td>
-                    <a href="/query/visualization/{{ snp.rs_value }}" target="_blank" >
+                    <a href="/query/visualisation/{{ snp.rs_value }}" target="_blank" >
                       {{ snp.rs_value }}
                     </a>
                     

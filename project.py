@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+import matplotlib.pyplot as plt
+import pandas as pd
 import os
 
 app = Flask(__name__)
@@ -42,7 +44,7 @@ class SNP_sumstat(db.Model):
     risk_std = db.Column('STD_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
 
 class plot(db.Model):
-    __tablename__ = 'TAJD_BEB'
+    __tablename__ = 'TajimasD_results_ALL_POPULATIONS'
     id = db.Column(db.Integer, primary_key=True) 
     chrom = db.Column('CHROM', db.Integer, unique=False)
     bin_start = db.Column('BIN_START', db.Integer, unique= False)
@@ -98,17 +100,51 @@ def population():
     return render_template('population.html')
 
 
-@app.route('/query/visualization/<rs_value>/', methods=['GET', 'POST'])
-def visualization(rs_value):
+@app.route('/query/visualisation/<rs_value>/', methods=['GET', 'POST'])
+def visualisation(rs_value):
+    snp = db.session.query(SNP).filter_by(rs_value=rs_value).first()
+
+    #get data from input rsid for pos slection
+    chromosome= snp.chr_id
+    position= snp.gene_pos
+    #image= 
+
+
+
     if request.method == 'POST':
          query5 = request.form.get('query5', '')
          query6 = request.form.get('query6', '')
-
+         
          if query5 and query6:
-             plot_q = db.session.query(
-                (plot.sa_pop == query5) & 
-                (plot.gene_pos == query6)).all() 
-    return render_template('visualization.html')
+             #filter for window snp falls in
+             window= (position // 10000) * 10000
+             lower= window - 50000
+             upper= window + 50000
+
+             filt = db.session.query(plot).filter(
+                 plot.sa_pop == query5,
+                 plot.tajD == query6,
+                 plot.chrom == chromosome,
+                 plot.window.between(lower, upper)
+                 ).all()
+                 
+             if filt:
+                df = pd.DataFrame([row.__dict__ for row in filt])  # Convert SQLAlchemy objects to dict
+                df = df.drop(columns=['_sa_instance_state'])  # Drop SQLAlchemy instance metadata column
+                print(df)
+             else:
+                 print("No data found for the given query.")
+        
+        
+            # plt.figure(figsize=(10,5))
+            # plt.scatter(df['BIN_START'], df['TajimaD'], alpha = 0.6)
+            # plt.axhline(y=-2, color = 'red', linestyle= '-')
+            # plt.xlabel(f"Chromsome {chromosome} Region (bp)")
+            # plt.ylabel("Tajima's D")
+            # plt.title(f"Tajima's D for Chromosome Position {window} ± 10kb ")
+
+    
+    return render_template('visualisation.html', rs_value=rs_value)
 
 
 
