@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+import matplotlib.pyplot as plt
+import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
@@ -101,69 +103,49 @@ def population():
 
 @app.route('/query/visualisation/<rs_value>/', methods=['GET', 'POST'])
 def visualisation(rs_value):
+    snp = db.session.query(SNP).filter_by(rs_value=rs_value).first()
 
-    query5 = None
-    query6 = None
-    filtered_plot_data = []
-    closest_wndw = None
+    #get data from input rsid for pos slection
+    chromosome= snp.chr_id
+    position= snp.gene_pos
+    #image= 
 
-    snps = SNP.query.filter_by(rs_value=rs_value).first()  # Get SNP data for the given rs_value
+
+
+    if request.method == 'POST':
+         query5 = request.form.get('query5', '')
+         query6 = request.form.get('query6', '')
+         
+         if query5 and query6:
+             #filter for window snp falls in
+             window= (position // 10000) * 10000
+             lower= window - 50000
+             upper= window + 50000
+
+             filt = db.session.query(plot).filter(
+                 plot.sa_pop == query5,
+                 plot.tajD == query6,
+                 plot.chrom == chromosome,
+                 plot.window.between(lower, upper)
+                 ).all()
+                 
+             if filt:
+                df = pd.DataFrame([row.__dict__ for row in filt])  # Convert SQLAlchemy objects to dict
+                df = df.drop(columns=['_sa_instance_state'])  # Drop SQLAlchemy instance metadata column
+                print(df)
+             else:
+                 print("No data found for the given query.")
+        
+        
+            # plt.figure(figsize=(10,5))
+            # plt.scatter(df['BIN_START'], df['TajimaD'], alpha = 0.6)
+            # plt.axhline(y=-2, color = 'red', linestyle= '-')
+            # plt.xlabel(f"Chromsome {chromosome} Region (bp)")
+            # plt.ylabel("Tajima's D")
+            # plt.title(f"Tajima's D for Chromosome Position {window} ± 10kb ")
+
     
-    print(f"Received rs_value: {rs_value}")
-
-    if snps:  # Check if the SNP record exists
-        user_chromosome = snps.chr_id  # Retrieve the chromosome from SNP record
-
-        if request.method == 'POST':
-            print(f"Received rs_value: {rs_value}")
-            query5 = request.form.get('query5', '')
-            query6 = request.form.get('query6', '')
-            
-
-        if query5 and (query6 == "tajD"):
-            snp_record = SNP.query.filter_by(rs_value=rs_value).first()
-
-            if snp_record:
-                target = snp_record.gene_pos
-                region_size = 10000
-
-            # Query the plot table for chromosome data related to the gene
-                plot_data = plot.query.filter_by(chrom=user_chromosome).all()  # Assuming chrom=3 as the relevant chromosome
-
-                # Convert the result to a list of BIN_START values for computation
-                bin_start_values = [entry.bin_start for entry in plot_data]
-
-                # Find the closest BIN_START to the SNP gene position
-                closest_wndw = min(bin_start_values, key=lambda x: abs(x - target))
-
-                # Filter the plot data for regions around this closest BIN_START
-                filtered_plot_data = [entry for entry in plot_data if 
-                                    closest_wndw - region_size <= entry.bin_start <= closest_wndw + region_size]
-
-                # Now you can use `filtered_plot_data` for your visualisation
-                # Pass the data to the template or generate the plot as needed
-                # return render_template('visualisation.html', rs_value=rs_value)
-            
-            #  plot_q = db.session.query(
-            #     (plot.sa_pop == query5) & 
-            #     (plot.bin_start == (snps.gene_pos )).all() 
-    return render_template('visualisation.html', rs_value=rs_value, plot_data=filtered_plot_data, closest_wndw=closest_wndw)
-
-
-def TajDPlot(plot_data, closest_wndw, region_size):
-    # Prepare data for the plot
-    x_vals = [entry.bin_start for entry in plot_data]
-    y_vals = [entry.tajD for entry in plot_data]
-
-    # Plotting the data
-    plt.scatter(x_vals, y_vals, alpha=0.6)
-    plt.axhline(y=-2, color='red', linestyle='-')  # Tajima's D threshold line
-    plt.xlabel(f"Chromosome 3 Region (bp)")
-    plt.ylabel("Tajima's D")
-    plt.title(f"Tajima's D for Chromosome Position {closest_wndw} ± {region_size}")
-    
-    # Show or save the plot
-    plt.show()  # or plt.savefig("tajd_plot.png")
+    return render_template('visualisation.html', rs_value=rs_value)
 
 if __name__ == '__main__':
     app.run(debug=True)
