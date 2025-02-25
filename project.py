@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 # below give link to database on cloud
-app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.expanduser('~/Downloads/t2d_database.db')}"
+app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.expanduser('~/Downloads/TAJD_STATS.db')}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
@@ -100,17 +100,59 @@ def population():
 
 @app.route('/query/visualization/<rs_value>/', methods=['GET', 'POST'])
 def visualization(rs_value):
-    if request.method == 'POST':
-         query5 = request.form.get('query5', '')
-         query6 = request.form.get('query6', '')
+    snps = SNP.query.filter_by(rs_value=rs_value).first()  # Get SNP data for the given rs_value
+    
+    if snps:  # Check if the SNP record exists
+        user_chromosome = snps.chr_id  # Retrieve the chromosome from SNP record
+    
+        if request.method == 'POST':
+            query5 = request.form.get('query5', '')
+            query6 = request.form.get('query6', '')
 
-         if query5 and query6:
-             plot_q = db.session.query(
-                (plot.sa_pop == query5) & 
-                (plot.gene_pos == query6)).all() 
+            if query5 and query6 == "tajD":
+                snp_record = SNP.query.filter_by(rs_value=rs_value).first()
+
+                if snp_record:
+                    target = snp_record.gene_pos
+                    region_size = 10000
+
+                # Query the plot table for chromosome data related to the gene
+                    plot_data = plot.query.filter_by(chrom=user_chromosome).all()  # Assuming chrom=3 as the relevant chromosome
+
+                    # Convert the result to a list of BIN_START values for computation
+                    bin_start_values = [entry.bin_start for entry in plot_data]
+
+                    # Find the closest BIN_START to the SNP gene position
+                    closest_wndw = min(bin_start_values, key=lambda x: abs(x - target))
+
+                    # Filter the plot data for regions around this closest BIN_START
+                    filtered_plot_data = [entry for entry in plot_data if 
+                                        closest_wndw - region_size <= entry.bin_start <= closest_wndw + region_size]
+
+                    # Now you can use `filtered_plot_data` for your visualization
+                    # Pass the data to the template or generate the plot as needed
+                    return render_template('visualization.html', plot_data=filtered_plot_data, closest_wndw=closest_wndw)
+                
+                #  plot_q = db.session.query(
+                #     (plot.sa_pop == query5) & 
+                #     (plot.bin_start == (snps.gene_pos )).all() 
     return render_template('visualization.html')
 
 
+def TajDPlot(plot_data, closest_wndw, region_size):
+    # Prepare data for the plot
+    x_vals = [entry.bin_start for entry in plot_data]
+    y_vals = [entry.tajD for entry in plot_data]
+
+    # Plotting the data
+    plt.scatter(x_vals, y_vals, alpha=0.6)
+    plt.axhline(y=-2, color='red', linestyle='-')  # Tajima's D threshold line
+    plt.xlabel(f"Chromosome 3 Region (bp)")
+    plt.ylabel("Tajima's D")
+    plt.title(f"Tajima's D for Chromosome Position {closest_wndw} ± {region_size}")
+    
+    # Show or save the plot
+    plt.show()  # or plt.savefig("tajd_plot.png")
 
 if __name__ == '__main__':
     app.run(debug=True)
