@@ -3,6 +3,9 @@ from flask_sqlalchemy import SQLAlchemy
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
+from io import BytesIO
+import base64
+
 
 app = Flask(__name__)
 # below give link to database on cloud
@@ -43,17 +46,19 @@ class SNP_sumstat(db.Model):
     risk_mean = db.Column('MEAN_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
     risk_std = db.Column('STD_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
 
-class plot(db.Model):
-    __tablename__ = 'TajimasD_results_ALL_POPULATIONS'
-    id = db.Column(db.Integer, primary_key=True) 
+class Tajima(db.Model):
+    __tablename__ = 'TajimasD_results_ALL_POPULATIONS' 
+    id = db.Column(db.Integer, primary_key=True)
     chrom = db.Column('CHROM', db.Integer, unique=False)
     bin_start = db.Column('BIN_START', db.Integer, unique= False)
-    tajD = db.Column('TajimaD', db.Integer, nullable=True)
+    tajD = db.Column('TajimaD', db.Float, nullable=True)
     sa_pop = db.Column('Population', db.String(50))
 
+#class iHS(db.Model):
+    #__tablename__ = ''
+
+
 # home page
-
-
 @app.route('/')
 def index():
     return render_template("index.html")
@@ -109,43 +114,50 @@ def visualisation(rs_value):
     position= snp.gene_pos
     #image= 
 
-
-
     if request.method == 'POST':
          query5 = request.form.get('query5', '')
          query6 = request.form.get('query6', '')
          
-         if query5 and query6:
-             #filter for window snp falls in
+         if query6 == "Tajima's D":
              window= (position // 10000) * 10000
              lower= window - 50000
              upper= window + 50000
-
-             filt = db.session.query(plot).filter(
-                 plot.sa_pop == query5,
-                 plot.tajD == query6,
-                 plot.chrom == chromosome,
-                 plot.window.between(lower, upper)
+            
+             filt = db.session.query(Tajima).filter(
+                 Tajima.sa_pop == query5,
+                 Tajima.chrom == chromosome,
+                 Tajima.bin_start.between(lower, upper)
                  ).all()
-                 
              if filt:
-                df = pd.DataFrame([row.__dict__ for row in filt])  # Convert SQLAlchemy objects to dict
-                df = df.drop(columns=['_sa_instance_state'])  # Drop SQLAlchemy instance metadata column
-                print(df)
-             else:
-                 print("No data found for the given query.")
-        
-        
-            # plt.figure(figsize=(10,5))
-            # plt.scatter(df['BIN_START'], df['TajimaD'], alpha = 0.6)
-            # plt.axhline(y=-2, color = 'red', linestyle= '-')
-            # plt.xlabel(f"Chromsome {chromosome} Region (bp)")
-            # plt.ylabel("Tajima's D")
-            # plt.title(f"Tajima's D for Chromosome Position {window} ± 10kb ")
+                df = pd.DataFrame([row.__dict__ for row in filt])  
+                df.drop(columns=['_sa_instance_state'], inplace=True)  
+                #print(df)
+                
+                #plot figure
+                plt.scatter(df['bin_start'], df['tajD'], alpha = 0.6)
+                plt.axhline(y=-2, color = 'red', linestyle= '-')
+                plt.xlabel(f"Chromsome {chromosome} Region (bp)")
+                plt.ylabel("Tajima's D")
+                plt.title(f"Tajima's D for Chromosome Position {window} ± 50kb ")
 
+                #save plot
+                img = BytesIO()
+                plt.savefig(img, format='png')
+                img.seek(0)
+                plot_url= base64.b64encode(img.getvalue().decode('utf8'))
+                plt.close()
+                return render_template('visualisation.html', rs_value=rs_value, plot_url=plot_url)
+
+             else:
+                print("No data found for the given query.")
+                
+        
+        #if query5 and query6 == "nSL":
+        ### need to add data to db to make filter query
+
+       #nSLPlot()
     
     return render_template('visualisation.html', rs_value=rs_value)
-
 
 
 if __name__ == '__main__':

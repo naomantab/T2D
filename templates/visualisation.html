@@ -67,7 +67,7 @@
             Select South Asian Population and Summary Statistic 
         </div>
         <br><br>
-        <form method="post" action="{{ url_for('visualisation', rs_value=rs_value) }}"></form>
+        <form method="post" action="{{ url_for('visualisation', rs_value=rs_value) }}">
                 <div>   
                 <label for="query">Choose Population: </label>
                 <input type="text" id="query5" list="populations" name="query5"value="{{request.form.get('query5','')}}">
@@ -84,15 +84,18 @@
                 <datalist id="stats_type">
                     <option value="Tajima's D">
                     <option value="nSL">
-                    <option value="iHS">
                 </datalist>
             </div>
              <!-- Submit button -->
             <div>
                 <button type="submit">Search</button>
             </div>
-    
-
+        </form>
+        <!-- Display the plot image -->
+         {% if plot_url %}
+            <h3>Plot for {{ rs_value }}</h3>
+            <img src="data:image/png;base64,{{ plot_url }}" alt="Plot">
+         {% endif %}
      <script>
         document.addEventListener("DOMContentLoaded", function() {
             const darkModeBtn = document.getElementById("darkModeBtn");
