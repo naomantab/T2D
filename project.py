@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 from flask_sqlalchemy import SQLAlchemy
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
 import os
@@ -108,8 +110,12 @@ def population():
 @app.route('/query/visualisation/<rs_value>/', methods=['GET', 'POST'])
 def visualisation(rs_value):
     snp = db.session.query(SNP).filter_by(rs_value=rs_value).first()
-
-    #get data from input rsid for pos slection
+   
+   #get data from input rsid for pos slection
+    gene = snp.mapped_gene
+    p_value = snp.snp_p_value
+    phenotype = snp.snp_phenotype
+    population = snp.snp_population
     chromosome= snp.chr_id
     position= snp.gene_pos
     #image= 
@@ -132,7 +138,9 @@ def visualisation(rs_value):
                 df = pd.DataFrame([row.__dict__ for row in filt])  
                 df.drop(columns=['_sa_instance_state'], inplace=True)  
                 #print(df)
-                
+
+                #clear previous plot
+                plt.clf()
                 #plot figure
                 plt.scatter(df['bin_start'], df['tajD'], alpha = 0.6)
                 plt.axhline(y=-2, color = 'red', linestyle= '-')
@@ -140,13 +148,13 @@ def visualisation(rs_value):
                 plt.ylabel("Tajima's D")
                 plt.title(f"Tajima's D for Chromosome Position {window} ± 50kb ")
 
-                #save plot
-                img = BytesIO()
-                plt.savefig(img, format='png')
-                img.seek(0)
-                plot_url= base64.b64encode(img.getvalue().decode('utf8'))
+                #save plt
+                buf= BytesIO()
+                plt.savefig(buf, format= "png")
                 plt.close()
-                return render_template('visualisation.html', rs_value=rs_value, plot_url=plot_url)
+                
+                data= base64.b64encode(buf.getbuffer()).decode("ascii")
+                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp)
 
              else:
                 print("No data found for the given query.")
@@ -157,7 +165,7 @@ def visualisation(rs_value):
 
        #nSLPlot()
     
-    return render_template('visualisation.html', rs_value=rs_value)
+    return render_template('visualisation.html', rs_value=rs_value, snp=snp)
 
 
 if __name__ == '__main__':
