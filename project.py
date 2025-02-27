@@ -123,41 +123,70 @@ def visualisation(rs_value):
     if request.method == 'POST':
          query5 = request.form.get('query5', '')
          query6 = request.form.get('query6', '')
+         query7 = request.form.get('query7', '')
          
          if query6 == "Tajima's D":
              window= (position // 10000) * 10000
-             lower= window - 50000
-             upper= window + 50000
-            
-             filt = db.session.query(Tajima).filter(
-                 Tajima.sa_pop == query5,
-                 Tajima.chrom == chromosome,
-                 Tajima.bin_start.between(lower, upper)
-                 ).all()
+             #make kb
+             lower= window - (int(query7) * 1000)
+             upper= window + (int(query7) * 1000)
+
+             if query5 == "All":
+                filt = db.session.query(Tajima).filter(
+                    Tajima.chrom == chromosome,
+                    Tajima.bin_start.between(lower, upper)
+                    ).all()
+             else:
+                filt = db.session.query(Tajima).filter(
+                    Tajima.sa_pop == query5,
+                    Tajima.chrom == chromosome,
+                    Tajima.bin_start.between(lower, upper)
+                    ).all()
+                   
              if filt:
                 df = pd.DataFrame([row.__dict__ for row in filt])  
-                df.drop(columns=['_sa_instance_state'], inplace=True)  
+                df.drop(columns=['_sa_instance_state'], inplace=True)
+                   
+    
                 #print(df)
+            
+                #average and st of region of inrest
+                region_mean = df['tajD'].mean()
+                region_std = df['tajD'].std()
 
-                #clear previous plot
+                #clear previous plot just in case
                 plt.clf()
+
+                #plot all or plot 1 population
+                if query5 == "All":
+                    populations = df['sa_pop'].unique()
+                    colors = plt.cm.get_cmap('tab10', len(populations))
+
+                    for idx, population in enumerate(populations):
+                        population_data = df[df['sa_pop'] == population]
+                        plt.scatter(population_data['bin_start'], population_data['tajD'], alpha=0.6, 
+                                    label=population, color=colors(idx))
+
+                else:
+                    plt.scatter(df['bin_start'], df['tajD'], alpha=0.6, label=query5, color='blue')
+
+
+         
                 #plot figure
-                plt.scatter(df['bin_start'], df['tajD'], alpha = 0.6)
                 plt.axhline(y=-2, color = 'red', linestyle= '-')
                 plt.xlabel(f"Chromsome {chromosome} Region (bp)")
                 plt.ylabel("Tajima's D")
-                plt.title(f"Tajima's D for Chromosome Position {window} ± 50kb ")
+                plt.legend()
+                plt.title(f"Tajima's D for Chromosome Position {window} ± {query7} ")
 
-                #save plt
+                #save plt 
                 buf= BytesIO()
                 plt.savefig(buf, format= "png")
                 plt.close()
-                
-                data= base64.b64encode(buf.getbuffer()).decode("ascii")
-                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp)
 
-             else:
-                print("No data found for the given query.")
+                data= base64.b64encode(buf.getbuffer()).decode("ascii")
+                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp, filt=filt)
+
                 
         
         #if query5 and query6 == "nSL":
