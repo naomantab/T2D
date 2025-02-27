@@ -77,6 +77,7 @@
                 <option value="Gujarati Indians in Houston, TX">
                 <option value="Indian Telugu in the UK">
                 <option value="Punjabi in Lahore, Pakistan">
+                <option value="All">
                 </datalist>
             </div>
             <div>
@@ -85,6 +86,16 @@
                 <datalist id="stats_type">
                     <option value="Tajima's D">
                     <option value="nSL">
+                </datalist>
+            </div>
+            <div>
+                <label for query="query">Choose Flanking Region (± kb)</label>
+                <input type="text" id="query7" list="Region_interest" name="query7" value="{{request.form.get('query7','')}}">
+                <datalist id="Region_interest">
+                    <option value="10 ">
+                    <option value="25">
+                    <option value="50">
+                    <option value="100">
                 </datalist>
             </div>
              <!-- Submit button -->
@@ -125,6 +136,28 @@
         <br><br>
         <!-- Display the plot image-->
         <img src="data:image/png;base64,{{ image_data }}">
+
+        <br><br>
+        <h2>SNP Query Summary Statistics</h2>
+        <table id="SMP_query_results" class="table table-striped">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col" col-index = 1>SNP RS-Value</th>
+                <th scope="col" col-index = 2>Genomic Position/Coordinate</th>
+                <th scope="col" col-index = 3>Chromosome</th>
+                <th scope="col" col-index = 4>Tajima's D</th>
+                <th scope="col" col-index = 4>Tajima's D Mean (selected region)</th>
+                <th scope="col" col-index = 4>Tajima's D Standard Deviation (Selected region)</th>
+              </tr>
+            </thead>
+            <tbody><tr>
+                <td>{{ snp.rs_value }}</td>
+                <td>{{ snp.gene_pos }}</td>
+                <td>{{snp.chr_id}}</td>
+            </tr> 
+            </tbody>
+          </table> 
+
 
      <script>
         document.addEventListener("DOMContentLoaded", function() {
