@@ -68,7 +68,7 @@
             Select South Asian Population and Summary Statistic 
         </div>
         <br><br>
-        <form method="post" action="{{ url_for('visualisation', rs_value=rs_value) }}"></form>
+        <form method="post" action="{{ url_for('visualisation', rs_value=rs_value) }}">
                 <div>   
                 <label for="query">Choose Population: </label>
                 <input type="text" id="query5" list="populations" name="query5"value="{{request.form.get('query5','')}}">
@@ -85,14 +85,46 @@
                 <datalist id="stats_type">
                     <option value="Tajima's D">
                     <option value="nSL">
-                    <option value="iHS">
                 </datalist>
             </div>
              <!-- Submit button -->
             <div>
                 <button type="submit">Search</button>
             </div>
-    
+        </form>
+        <br><br>
+        <h1>Search Results</h1>
+        <table id="snp-table" class="table table-striped">
+            <thead class="thead-dark">
+              <tr>
+                <th scope="col" col-index = 1>SNP RS-Value</th>
+                <th scope="col" col-index = 2>Genomic Position/Coordinate</th>
+                <th scope="col" col-index = 3>Mapped Gene Name</th>
+                <th scope="col" col-index = 4>Chromosome</th>
+                <th scope="col" col-index = 5>P Value</th>
+                <th scope="col" col-index = 6>Phenotype</th>
+                <th scope="col" col-index = 7>Population</th>
+              </tr>
+            </thead>
+            <tbody><tr>
+                <td>{{ snp.rs_value }}</td>
+                <td>{{ snp.gene_pos }}</td>
+                <td>
+                  <a href="/query/ontology/{{ snp.mapped_gene }}" target="_blank">
+                    {{ snp.mapped_gene }}
+                  </a>
+                </td>
+                <td>{{snp.chr_id}}</td>
+                <td>{{ snp.snp_p_value }}</td>
+                <td>{{ snp.snp_phenotype }}</td>
+                <td>{{ snp.snp_population }}</td>
+            </tr> 
+            </tbody>
+          </table> 
+
+        <br><br>
+        <!-- Display the plot image-->
+        <img src="data:image/png;base64,{{ image_data }}">
 
      <script>
         document.addEventListener("DOMContentLoaded", function() {
