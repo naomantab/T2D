@@ -97,15 +97,6 @@ def ontology(mapped_gene):
     # Render the ontology results page
     return render_template('ontology.html', mapped_gene=mapped_gene, ontology_results=ontology_results)
 
-@app.route('/population', methods=['GET', 'POST'])
-def population():
-    if request.method == 'POST':
-        population = request.form['population']
-        stats = PopulationData.query.filter_by(
-            population_name=population).all()
-        return render_template('population_stats.html', stats=stats)
-    return render_template('population.html')
-
 
 @app.route('/query/visualisation/<rs_value>/', methods=['GET', 'POST'])
 def visualisation(rs_value):
@@ -120,10 +111,16 @@ def visualisation(rs_value):
     position= snp.gene_pos
     #image= 
 
+    
+
+    
+
     if request.method == 'POST':
          query5 = request.form.get('query5', '')
          query6 = request.form.get('query6', '')
          query7 = request.form.get('query7', '')
+         
+         pop_info_disp = population_info.get(query5, "Please select a population")
          
          if query6 == "Tajima's D":
              window= (position // 10000) * 10000
@@ -156,6 +153,7 @@ def visualisation(rs_value):
 
                 #clear previous plot just in case
                 plt.clf()
+                plt.figure(figsize=(10,6))
 
                 #plot all or plot 1 population
                 if query5 == "All":
@@ -173,11 +171,13 @@ def visualisation(rs_value):
 
          
                 #plot figure
+                
                 plt.axhline(y=-2, color = 'red', linestyle= '-')
                 plt.xlabel(f"Chromsome {chromosome} Region (bp)")
                 plt.ylabel("Tajima's D")
                 plt.legend()
                 plt.title(f"Tajima's D for Chromosome Position {window} ± {query7} ")
+                
 
                 #save plt 
                 buf= BytesIO()
@@ -185,7 +185,7 @@ def visualisation(rs_value):
                 plt.close()
 
                 data= base64.b64encode(buf.getbuffer()).decode("ascii")
-                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp, filt=filt)
+                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp, pop_info_disp=pop_info_disp, filt=filt)
 
                 
         
@@ -195,6 +195,27 @@ def visualisation(rs_value):
        #nSLPlot()
    
     return render_template('visualisation.html', rs_value=rs_value, snp=snp)
+
+
+# Info for each population
+global population_info
+population_info = {
+        "Bengali in Bangladesh": """🌎 Bengali in Bangladesh. 
+                                This population is sampled directly from Bangladesh, representing the genetic diversity of ethnic Bengalis living in the region. 
+                                Data comes from Phase 3 of the 1000 Genomes Project, with  a total of 87 samples. 
+                                These participants recruited from rural and urban areas across Bangladesh.""",
+        "Gujarati Indians in Houston, TX": """🌎 Gujarati Indians in Houston, Texas. 
+                                        This is a diaspora population, with 107 participants of Gujarati Indian ancestry living in Houston, Texas. 
+                                        This group is part of Phase 3 of the 1000 Genomes Project. 
+                                        Their genetic data is especially intruiging because of potential environmental effects linked to migration, diet changes, and lifestyle shifts in the US.""",
+        "Indian Telugu in the UK": """🌎 Indian Telugu in the UK. 
+                                 This group includes 103 individuals of Telugu-speaking Indian ancestry residing in the United Kingdom, many of whom migrated in the 20th century. 
+                                 Data comes from Phase 3 of the 1000 Genomes Project.""",
+        "Punjabi in Lahore, Pakistan": """🌎 Punjabi in Lahore, Pakistan. 
+                                    This population consists of 97 ethnic Punjabis living in Lahore, Pakistan. 
+                                    Sampled locally fir Phase 3 of the 1000 Genomes Project, these participants provide a local reference population for understanding genetic variation and T2D risk within South Asia.""",
+        "All": "Please select a population to see the information."
+}
 
 
 if __name__ == '__main__':
