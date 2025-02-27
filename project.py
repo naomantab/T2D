@@ -164,7 +164,7 @@ def visualisation(rs_value):
         ### need to add data to db to make filter query
 
        #nSLPlot()
-    
+   
     return render_template('visualisation.html', rs_value=rs_value, snp=snp)
 
 

@@ -26,7 +26,7 @@ This project involves the development of a **web-based software tool** to handle
 ## 🖥️ Technologies Used
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python (Flask)
-- **Database:** SQL (MySQL)
+- **Database:** SQL (SQLite)
 - **Data Sources:**
   - [GWAS Catalog](https://www.ebi.ac.uk/gwas)
   - [T2D Knowledge Portal](https://t2d.hugeamp.org)
