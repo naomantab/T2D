@@ -148,9 +148,12 @@
         <img src="data:image/png;base64,{{ image_data }}" class="img-fluid">
 
         <br><br>
-        <h2 class="text-center">SNP Query Summary Statistics</h2>
-        <table id="SMP_query_results" class="table table-striped">
-            <thead class="thead-dark">
+        {% if filt %}
+            <form method="post">
+                 <input type="submit" name="download" class="btn btn-primary">Download Data (TSV)</button>
+                 <h2 class="text-center">SNP Query Summary Statistics</h2>
+                 <table id="SMP_query_results" class="table table-striped">
+                 <thead class="thead-dark">
                 <tr>
                     <th scope="col">SNP RS-Value</th>
                     <th scope="col">Genomic Position/Coordinate</th>
@@ -165,9 +168,14 @@
                     <td>{{ snp.rs_value }}</td>
                     <td>{{ snp.gene_pos }}</td>
                     <td>{{snp.chr_id}}</td>
+                    <td> {{tajD_value}}</td>
+                    <td>{{region_mean}}</td>
+                    <td>{{region_std}}</td>
                 </tr>
             </tbody>
         </table>
+        </form>
+        {% endif %}
     </div>
 </body>
 
