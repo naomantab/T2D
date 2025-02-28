@@ -157,6 +157,8 @@ def visualisation(rs_value):
                 df["Tajima's D Std. (Selected Region)"] = region_std   
                 df["Tajima's D"] = tajD_value
 
+                print(df)
+
 
                 #clear previous plot just in case
                 plt.clf()
@@ -194,6 +196,15 @@ def visualisation(rs_value):
                 plt.savefig(buf, format= "png")
                 plt.close()
 
+                if 'download' in request.form:
+                    tsv_buffer = BytesIO()
+                    df.to_csv(tsv_buffer, index=False, sep="\t")
+                    tsv_buffer.seek(0)
+                    return send_file(tsv_buffer,
+                                     mimetype="text/tab-separated-values",
+                                     as_attachment=True,
+                                     downloadname=f"tajimasD{rs_value}.tsv")
+
                 #base64 encode and decode image data
                 data= base64.b64encode(buf.getbuffer()).decode("ascii")
                 
@@ -214,6 +225,59 @@ def visualisation(rs_value):
        #nSLPlot()
 
     return render_template('visualisation.html', rs_value=rs_value, snp=snp)
+
+
+@app.route('/query/visualisation/<rs_value>/download', methods=['GET', 'POST'])
+def download_stats(rs_value):
+    pop = request.args.get('pop', 'All')
+    window_size = int(request.args.get('window', 10))  # Default 10kb window
+
+    snp = db.session.query(SNP).filter_by(rs_value=rs_value).first()
+    if not snp:
+        return "SNP not found", 404
+
+    chromosome = snp.chr_id
+    position = snp.gene_pos
+
+    window = (position // 10000) * 10000
+    lower = window - (window_size * 1000)
+    upper = window + (window_size * 1000)
+
+    query = db.session.query(Tajima).filter(
+        Tajima.chrom == chromosome,
+        Tajima.bin_start.between(lower, upper)
+    )
+    
+    if pop != "All":
+        query = query.filter(Tajima.sa_pop == pop)
+
+    filt = query.all()
+
+    if not filt:
+        return "No Tajima's D data found for this SNP.", 404
+
+    df = pd.DataFrame([row.__dict__ for row in filt])
+    df.drop(columns=['_sa_instance_state'], inplace=True)
+
+    #average, std and SNPs Tajimas 
+    region_mean = round(df['tajD'].mean(), 4)
+    region_std = round(df['tajD'].std(),4)
+    tajD_value= next((row.tajD for row in filt if row.bin_start == window))
+    #now adding these calulations to named colums in the df
+    df["Tajima's D Mean (Selected Region)"] = region_mean
+    df["Tajima's D Std. (Selected Region)"] = region_std   
+    df["Tajima's D"] = tajD_value
+
+    tsv_buffer = BytesIO()
+    df.to_csv(tsv_buffer, index=False, sep="\t")
+    tsv_buffer.seek(0)
+
+    return send_file(
+        tsv_buffer,
+        mimetype="text/tab-separated-values",
+        as_attachment=True,
+        download_name=f"tajimasD_{rs_value}.tsv"
+    )
 
 
 
