@@ -148,13 +148,13 @@ def visualisation(rs_value):
                 #print(df)
             
                 #average and st of region of inrest
-                region_mean = df['tajD'].mean()
-                region_std = df['tajD'].std()
+                region_mean = round(df['tajD'].mean(), 4)
+                region_std = round(df['tajD'].std(),4)
 
                 #clear previous plot just in case
                 plt.clf()
                 plt.figure(figsize=(10,6))
-
+                tajD_value= next((row.tajD for row in filt if row.bin_start == window))
                 #plot all or plot 1 population
                 if query5 == "All":
                     populations = df['sa_pop'].unique()
@@ -175,8 +175,8 @@ def visualisation(rs_value):
                 plt.axhline(y=-2, color = 'red', linestyle= '-')
                 plt.xlabel(f"Chromsome {chromosome} Region (bp)")
                 plt.ylabel("Tajima's D")
-                plt.legend()
-                plt.title(f"Tajima's D for Chromosome Position {window} ± {query7} ")
+                plt.legend(loc='upper right')
+                plt.title(f"Tajima's D for Chromosome Position {window} ± {query7} kb")
                 
 
                 #save plt 
@@ -185,7 +185,7 @@ def visualisation(rs_value):
                 plt.close()
 
                 data= base64.b64encode(buf.getbuffer()).decode("ascii")
-                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp, pop_info_disp=pop_info_disp, filt=filt)
+                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp, pop_info_disp=pop_info_disp, filt=filt, region_mean=region_mean, region_std=region_std, tajD_value=tajD_value)
 
                 
         

@@ -148,6 +148,7 @@
         <img src="data:image/png;base64,{{ image_data }}" class="img-fluid">
 
         <br><br>
+        {% if filt %}
         <h2 class="text-center">SNP Query Summary Statistics</h2>
         <table id="SMP_query_results" class="table table-striped">
             <thead class="thead-dark">
@@ -165,9 +166,13 @@
                     <td>{{ snp.rs_value }}</td>
                     <td>{{ snp.gene_pos }}</td>
                     <td>{{snp.chr_id}}</td>
+                    <td> {{tajD_value}}</td>
+                    <td>{{region_mean}}</td>
+                    <td>{{region_std}}</td>
                 </tr>
             </tbody>
         </table>
+        {% endif %}
     </div>
 </body>
 
