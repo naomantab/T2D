@@ -109,10 +109,6 @@ def visualisation(rs_value):
     population = snp.snp_population
     chromosome= snp.chr_id
     position= snp.gene_pos
-    #image= 
-
-    
-
     
 
     if request.method == 'POST':
@@ -127,7 +123,8 @@ def visualisation(rs_value):
              #make kb
              lower= window - (int(query7) * 1000)
              upper= window + (int(query7) * 1000)
-
+             
+             #user selects either ALL or one populations for plot
              if query5 == "All":
                 filt = db.session.query(Tajima).filter(
                     Tajima.chrom == chromosome,
@@ -143,13 +140,13 @@ def visualisation(rs_value):
              if filt:
                 df = pd.DataFrame([row.__dict__ for row in filt])  
                 df.drop(columns=['_sa_instance_state'], inplace=True)
-                   
-    
-                #print(df)
+                
             
                 #average and st of region of inrest
                 region_mean = round(df['tajD'].mean(), 4)
                 region_std = round(df['tajD'].std(),4)
+
+                
 
                 #clear previous plot just in case
                 plt.clf()
@@ -171,7 +168,6 @@ def visualisation(rs_value):
 
          
                 #plot figure
-                
                 plt.axhline(y=-2, color = 'red', linestyle= '-')
                 plt.xlabel(f"Chromsome {chromosome} Region (bp)")
                 plt.ylabel("Tajima's D")
@@ -185,15 +181,23 @@ def visualisation(rs_value):
                 plt.close()
 
                 data= base64.b64encode(buf.getbuffer()).decode("ascii")
-                return render_template('visualisation.html', rs_value=rs_value, image_data= data, snp=snp, pop_info_disp=pop_info_disp, filt=filt, region_mean=region_mean, region_std=region_std, tajD_value=tajD_value)
+                return render_template('visualisation.html', 
+                                       rs_value=rs_value, 
+                                       image_data= data, 
+                                       snp=snp, 
+                                       pop_info_disp=pop_info_disp, 
+                                       filt=filt, region_mean=region_mean, 
+                                       region_std=region_std, 
+                                       tajD_value=tajD_value)
 
-                
+ 
         
         #if query5 and query6 == "nSL":
         ### need to add data to db to make filter query
 
        #nSLPlot()
-   
+
+
     return render_template('visualisation.html', rs_value=rs_value, snp=snp)
 
 
