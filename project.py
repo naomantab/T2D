@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 import matplotlib
 matplotlib.use('Agg')
@@ -110,15 +110,18 @@ def visualisation(rs_value):
     chromosome= snp.chr_id
     position= snp.gene_pos
     
-
+    #get the query info
     if request.method == 'POST':
          query5 = request.form.get('query5', '')
          query6 = request.form.get('query6', '')
          query7 = request.form.get('query7', '')
          
+         #display the poulation info
          pop_info_disp = population_info.get(query5, "Please select a population")
          
+         #if Tajimas stat is selected...
          if query6 == "Tajima's D":
+             # get the window the SNP falls into
              window= (position // 10000) * 10000
              #make kb
              lower= window - (int(query7) * 1000)
@@ -126,11 +129,13 @@ def visualisation(rs_value):
              
              #user selects either ALL or one populations for plot
              if query5 == "All":
+                #get tajimas for window SNP falls in for all populations
                 filt = db.session.query(Tajima).filter(
                     Tajima.chrom == chromosome,
                     Tajima.bin_start.between(lower, upper)
                     ).all()
              else:
+                #get tajimas for window of one population
                 filt = db.session.query(Tajima).filter(
                     Tajima.sa_pop == query5,
                     Tajima.chrom == chromosome,
@@ -138,22 +143,30 @@ def visualisation(rs_value):
                     ).all()
                    
              if filt:
+                #convert either query to dataframe
                 df = pd.DataFrame([row.__dict__ for row in filt])  
                 df.drop(columns=['_sa_instance_state'], inplace=True)
                 
             
-                #average and st of region of inrest
+                #average, std and SNPs Tajimas 
                 region_mean = round(df['tajD'].mean(), 4)
                 region_std = round(df['tajD'].std(),4)
+                tajD_value= next((row.tajD for row in filt if row.bin_start == window))
+                #now adding these calulations to named colums in the df
+                df["Tajima's D Mean (Selected Region)"] = region_mean
+                df["Tajima's D Std. (Selected Region)"] = region_std   
+                df["Tajima's D"] = tajD_value
 
-                
 
                 #clear previous plot just in case
                 plt.clf()
+
+                #set figure size for plot of results
                 plt.figure(figsize=(10,6))
-                tajD_value= next((row.tajD for row in filt if row.bin_start == window))
+
                 #plot all or plot 1 population
                 if query5 == "All":
+                    #colour map based on indexed populations set to tab10
                     populations = df['sa_pop'].unique()
                     colors = plt.cm.get_cmap('tab10', len(populations))
 
@@ -163,6 +176,7 @@ def visualisation(rs_value):
                                     label=population, color=colors(idx))
 
                 else:
+                    #otherwise plot the selected population
                     plt.scatter(df['bin_start'], df['tajD'], alpha=0.6, label=query5, color='blue')
 
 
@@ -180,7 +194,9 @@ def visualisation(rs_value):
                 plt.savefig(buf, format= "png")
                 plt.close()
 
+                #base64 encode and decode image data
                 data= base64.b64encode(buf.getbuffer()).decode("ascii")
+                
                 return render_template('visualisation.html', 
                                        rs_value=rs_value, 
                                        image_data= data, 
@@ -197,8 +213,8 @@ def visualisation(rs_value):
 
        #nSLPlot()
 
-
     return render_template('visualisation.html', rs_value=rs_value, snp=snp)
+
 
 
 # Info for each population
