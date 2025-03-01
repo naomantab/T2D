@@ -114,40 +114,40 @@ def ontology(mapped_gene):
 def visualisation(rs_value):
     snp = db.session.query(SNP).filter_by(rs_value=rs_value).first()
    
-   #get data from input rsid for pos slection
+    # get data from input rsid for pos slection
     gene = snp.mapped_gene
     p_value = snp.snp_p_value
     phenotype = snp.snp_phenotype
     population = snp.snp_population
-    chromosome= snp.chr_id
-    position= snp.gene_pos
+    chromosome = snp.chr_id
+    position = snp.gene_pos
     
-    #get the query info
+    # get the query info
     if request.method == 'POST':
          query5 = request.form.get('query5', '')
          query6 = request.form.get('query6', '')
          query7 = request.form.get('query7', '')
          
-         #display the poulation info
+         # display the poulation info
          pop_info_disp = population_info.get(query5, "Please select a population")
          
-         #if Tajimas stat is selected...
+         # if Tajimas stat is selected...
          if query6 == "Tajima's D":
              # get the window the SNP falls into
-             window= (position // 10000) * 10000
-             #make kb
-             lower= window - (int(query7) * 1000)
-             upper= window + (int(query7) * 1000)
+             window = (position // 10000) * 10000
+             # make kb
+             lower = window - (int(query7) * 1000)
+             upper = window + (int(query7) * 1000)
              
-             #user selects either ALL or one populations for plot
+             # user selects either ALL or one populations for plot
              if query5 == "All":
-                #get tajimas for window SNP falls in for all populations
+                # get tajimas for window SNP falls in for all populations
                 filt = db.session.query(Tajima).filter(
                     Tajima.chrom == chromosome,
                     Tajima.bin_start.between(lower, upper)
                     ).all()
              else:
-                #get tajimas for window of one population
+                # get tajimas for window of one population
                 filt = db.session.query(Tajima).filter(
                     Tajima.sa_pop == query5,
                     Tajima.chrom == chromosome,
@@ -155,12 +155,12 @@ def visualisation(rs_value):
                     ).all()
                    
              if filt:
-                #convert either query to dataframe
+                # convert either query to dataframe
                 df = pd.DataFrame([row.__dict__ for row in filt])  
                 df.drop(columns=['_sa_instance_state'], inplace=True)
                 
             
-                #average, std and SNPs Tajimas 
+                # average, std and SNPs Tajimas 
                 region_mean = round(df['tajD'].mean(), 4)
                 region_std = round(df['tajD'].std(),4)
                 tajD_value= next((row.tajD for row in filt if row.bin_start == window))
@@ -169,16 +169,13 @@ def visualisation(rs_value):
                 df["Tajima's D Std. (Selected Region)"] = region_std   
                 df["Tajima's D"] = tajD_value
 
-                print(df)
-
-
-                #clear previous plot just in case
+                # clear previous plot just in case
                 plt.clf()
 
-                #set figure size for plot of results
+                # set figure size for plot of results
                 plt.figure(figsize=(10,6))
 
-                #plot all or plot 1 population
+                # plot all or plot 1 population
                 if query5 == "All":
                     #colour map based on indexed populations set to tab10
                     populations = df['sa_pop'].unique()
@@ -195,7 +192,7 @@ def visualisation(rs_value):
 
 
          
-                #plot figure
+                # plot figure
                 plt.axhline(y=-2, color = 'red', linestyle= '-')
                 plt.xlabel(f"Chromsome {chromosome} Region (bp)")
                 plt.ylabel("Tajima's D")
@@ -203,7 +200,7 @@ def visualisation(rs_value):
                 plt.title(f"Tajima's D for Chromosome Position {window} ± {query7} kb")
                 
 
-                #save plt 
+                # save plt 
                 buf= BytesIO()
                 plt.savefig(buf, format= "png")
                 plt.close()
@@ -213,21 +210,21 @@ def visualisation(rs_value):
                     df.to_csv(tsv_buffer, index=False, sep="\t")
                     tsv_buffer.seek(0)
                     return send_file(tsv_buffer,
-                                     mimetype="text/tab-separated-values",
-                                     as_attachment=True,
-                                     downloadname=f"tajimasD{rs_value}.tsv")
+                                        mimetype="text/tab-separated-values",
+                                        as_attachment=True,
+                                        downloadname=f"tajimasD{rs_value}.tsv")
 
-                #base64 encode and decode image data
+                # base64 encode and decode image data
                 data= base64.b64encode(buf.getbuffer()).decode("ascii")
                 
                 return render_template('visualisation.html', 
-                                       rs_value=rs_value, 
-                                       image_data= data, 
-                                       snp=snp, 
-                                       pop_info_disp=pop_info_disp, 
-                                       filt=filt, region_mean=region_mean, 
-                                       region_std=region_std, 
-                                       tajD_value=tajD_value)
+                                        rs_value=rs_value, 
+                                        image_data= data, 
+                                        snp=snp, 
+                                        pop_info_disp=pop_info_disp, 
+                                        filt=filt, region_mean=region_mean, 
+                                        region_std=region_std, 
+                                        tajD_value=tajD_value)
 
  
         
