@@ -65,6 +65,12 @@ class Tajima(db.Model):
 def index():
     return render_template("index.html")
 
+# about page
+@app.route('/about')
+def about():
+    return render_template("about.html")
+
+
 # SNP query page
 
 
