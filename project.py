@@ -56,8 +56,14 @@ class Tajima(db.Model):
     tajD = db.Column('TajimaD', db.Float, nullable=True)
     sa_pop = db.Column('Population', db.String(50))
 
-#class iHS(db.Model):
-    #__tablename__ = ''
+
+class NSL(db.Model):
+    __tablename__ = 'NSL_results'
+    id = db.Column(db.Integer, primary_key=True)
+    chrom_num = db.Column('Chromosome_Number', db.Integer, unique=False)
+    win_start = db.Column('Window_Size_Lower', db.Integer, unique= False)
+    nsl_val = tajD = db.Column('Standardised_nSL', db.Float, nullable=True)
+    nsl_sa_pop = db.Column('Population', db.String(50))
 
 
 # home page
