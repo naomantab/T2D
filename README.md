@@ -9,9 +9,12 @@ This project involves the development of a **web-based software tool** to handle
   - SNP ID (rs value)
   - Genomic coordinates (chromosome, start, and end)
   - Mapped gene name
+  - Population
+    
 - Display the following details for each SNP:
-  - SNP name and genomic position
-  - p-value from association tests
+  - SNP name
+  - genomic position
+  - p-value from genome-wide association study
   - Mapped gene(s)
   - Summary statistics of **positive selection** for at least two South Asian populations
 - **Gene ontology analysis:**
@@ -21,7 +24,7 @@ This project involves the development of a **web-based software tool** to handle
   - Display **descriptive statistics**
   - **Visualize summary statistics** for positive selection across genomic regions
 - **Exportable results:**
-  - Download a text file containing summary statistics (average & standard deviation)
+  - Download a text file (TSV) containing summary statistics (average & standard deviation)
 
 ## 🖥️ Technologies Used
 - **Frontend:** HTML, CSS, JavaScript
