@@ -58,11 +58,11 @@ class Tajima(db.Model):
 
 
 class NSL(db.Model):
-    __tablename__ = 'NSL_results'
-    id = db.Column(db.Integer, primary_key=True)
+    __tablename__ = 'Combined_Table'
+    id = db.Column('rowid', db.Integer, primary_key=True)
     chrom_num = db.Column('Chromosome_Number', db.Integer, unique=False)
-    win_start = db.Column('Window_Size_Lower', db.Integer, unique= False)
-    nsl_val = tajD = db.Column('Standardised_nSL', db.Float, nullable=True)
+    win_start = db.Column('Window_Size_Lower', db.Integer)
+    nsl_val = db.Column('Standardised_nSL', db.Float, nullable=True)
     nsl_sa_pop = db.Column('Population', db.String(50))
 
 
@@ -132,77 +132,117 @@ def visualisation(rs_value):
          pop_info_disp = population_info.get(query5, "Please select a population")
          
          # if Tajimas stat is selected...
-         if query6 == "Tajima's D":
-             # get the window the SNP falls into
-             window = (position // 10000) * 10000
-             # make kb
-             lower = window - (int(query7) * 1000)
-             upper = window + (int(query7) * 1000)
-             
-             # user selects either ALL or one populations for plot
-             if query5 == "All":
-                # get tajimas for window SNP falls in for all populations
-                filt = db.session.query(Tajima).filter(
-                    Tajima.chrom == chromosome,
-                    Tajima.bin_start.between(lower, upper)
-                    ).all()
-             else:
-                # get tajimas for window of one population
-                filt = db.session.query(Tajima).filter(
-                    Tajima.sa_pop == query5,
-                    Tajima.chrom == chromosome,
-                    Tajima.bin_start.between(lower, upper)
-                    ).all()
-                   
-             if filt:
-                # convert either query to dataframe
-                df = pd.DataFrame([row.__dict__ for row in filt])  
+         if query6 in ["Tajima's D", "nSL"]:
+
+            if query6 == "Tajima's D":
+                StatModel = Tajima
+                columns = {
+                    "chrom": "chrom",
+                    "bin_start": "bin_start",
+                    "stat_column": "tajD",
+                    "population": "sa_pop",
+                    "plot_title": "Tajima's D"
+                }
+            elif query6 == "nSL":
+                StatModel = NSL
+                columns = {
+                    "chrom": "chrom_num",
+                    "bin_start": "win_start",
+                    "stat_column": "nsl_val",
+                    "population": "nsl_sa_pop",
+                    "plot_title": "nSL"
+                }
+
+            window = (position // 10000) * 10000
+            lower = window - (int(query7) * 1000)
+            upper = window + (int(query7) * 1000)
+
+            if query5 == "All":
+                filt = db.session.query(StatModel).filter(
+                    getattr(StatModel, columns['chrom']) == chromosome,
+                    getattr(StatModel, columns['bin_start']).between(lower, upper)).all()
+
+            else:
+                filt = db.session.query(StatModel).filter(
+                getattr(StatModel, columns['population']) == query5,
+                getattr(StatModel, columns['chrom']) == chromosome,
+                getattr(StatModel, columns['bin_start']).between(lower, upper)).all()
+
+            if filt:
+                df = pd.DataFrame([row.__dict__ for row in filt])
                 df.drop(columns=['_sa_instance_state'], inplace=True)
-                
-            
-                # average, std and SNPs Tajimas 
-                region_mean = round(df['tajD'].mean(), 4)
-                region_std = round(df['tajD'].std(),4)
-                tajD_value= next((row.tajD for row in filt if row.bin_start == window))
-                #now adding these calulations to named colums in the df
-                df["Tajima's D Mean (Selected Region)"] = region_mean
-                df["Tajima's D Std. (Selected Region)"] = region_std   
-                df["Tajima's D"] = tajD_value
 
-                # clear previous plot just in case
+                region_mean = round(df[columns['stat_column']].mean(), 4)
+                region_std = round(df[columns['stat_column']].std(), 4)
+                stat_value = next((getattr(row, columns['stat_column']) for row in filt if getattr(row, columns['bin_start']) == window))
+
+
+                df[f"{columns['plot_title']} Mean (Selected Region)"] = region_mean
+                df[f"{columns['plot_title']} Std. (Selected Region)"] = region_std
+                df[columns['plot_title']] = stat_value
+
+                # Clear and plot (same structure, different labels)
                 plt.clf()
+                plt.figure(figsize=(10, 6))
 
-                # set figure size for plot of results
-                plt.figure(figsize=(10,6))
-
-                # plot all or plot 1 population
                 if query5 == "All":
-                    #colour map based on indexed populations set to tab10
-                    populations = df['sa_pop'].unique()
+                    populations = df[columns['population']].unique()
                     colors = plt.cm.get_cmap('tab10', len(populations))
 
                     for idx, population in enumerate(populations):
-                        population_data = df[df['sa_pop'] == population]
-                        plt.scatter(population_data['bin_start'], population_data['tajD'], alpha=0.6, 
-                                    label=population, color=colors(idx))
-
+                        population_data = df[df[columns['population']] == population]
+                        plt.scatter(
+                            population_data[columns['bin_start']], population_data[columns['stat_column']],
+                            alpha=0.6, label=population, color=colors(idx))
                 else:
-                    #otherwise plot the selected population
-                    plt.scatter(df['bin_start'], df['tajD'], alpha=0.6, label=query5, color='blue')
-
-
-         
-                # plot figure
-                plt.axhline(y=-2, color = 'red', linestyle= '-')
-                plt.xlabel(f"Chromsome {chromosome} Region (bp)")
-                plt.ylabel("Tajima's D")
-                plt.legend(loc='upper right')
-                plt.title(f"Tajima's D for Chromosome Position {window} ± {query7} kb")
+                    plt.scatter(
+                        df[columns['bin_start']], df[columns['stat_column']],
+                        alpha=0.6, label=query5, color='blue')
                 
+                ### for debugging
 
-                # save plt 
-                buf= BytesIO()
-                plt.savefig(buf, format= "png")
+                # Debugging each part of the query
+                print(f"columns['chrom']: {columns['chrom']}")
+                print(f"columns['bin_start']: {columns['bin_start']}")
+                print(f"chromosome: {chromosome}")
+                print(f"lower: {lower}, upper: {upper}")
+                print(f"query5: {query5}")
+
+                # Construct the query and print it for debugging
+                query = db.session.query(StatModel).filter(
+                    getattr(StatModel, columns['chrom']) == chromosome,
+                    getattr(StatModel, columns['bin_start']).between(lower, upper)
+                )
+
+                # Check if population filter is needed
+                if query5 != "All":
+                    print(f"Adding population filter for {query5}")
+                    query = query.filter(getattr(StatModel, columns['population']) == query5)
+
+                # Execute the query and get the results
+                results = query.all()
+
+                # Print the SQL query and the results
+                print(f"Generated SQL Query: {str(query)}")  # To view the query being executed
+                print(f"Query Results: {results}")  # To check what is returned
+
+                ### ignore above
+
+                # for debugging
+                print(str(query))
+                print(filt)
+
+                line1 = plt.axhline(y=-2, color='red', linestyle='-', label='Threshold (-2)')
+                line2 = plt.axhline(y=region_mean, color='green', linestyle='-', label='Region Mean')
+                plt.xlabel(f"Chromosome {chromosome} Region (bp)")
+                plt.ylabel(columns['plot_title'])
+                legend1 = plt.legend(loc='lower right', title='Legend')
+                plt.gca().add_artist(legend1)
+                plt.title(f"{columns['plot_title']} for Chromosome Position {window} ± {query7} kb")
+                plt.tight_layout()
+
+                buf = BytesIO()
+                plt.savefig(buf, format="png")
                 plt.close()
 
                 if 'download' in request.form:
@@ -210,28 +250,21 @@ def visualisation(rs_value):
                     df.to_csv(tsv_buffer, index=False, sep="\t")
                     tsv_buffer.seek(0)
                     return send_file(tsv_buffer,
-                                        mimetype="text/tab-separated-values",
-                                        as_attachment=True,
-                                        downloadname=f"tajimasD{rs_value}.tsv")
+                                    mimetype="text/tab-separated-values",
+                                    as_attachment=True,
+                                    download_name=f"{columns['plot_title']}_{rs_value}.tsv")
 
-                # base64 encode and decode image data
-                data= base64.b64encode(buf.getbuffer()).decode("ascii")
-                
-                return render_template('visualisation.html', 
-                                        rs_value=rs_value, 
-                                        image_data= data, 
-                                        snp=snp, 
-                                        pop_info_disp=pop_info_disp, 
-                                        filt=filt, region_mean=region_mean, 
-                                        region_std=region_std, 
-                                        tajD_value=tajD_value)
+                data = base64.b64encode(buf.getbuffer()).decode("ascii")
 
- 
-        
-        #if query5 and query6 == "nSL":
-        ### need to add data to db to make filter query
-
-       #nSLPlot()
+                return render_template('visualisation.html',
+                                    rs_value=rs_value,
+                                    image_data=data,
+                                    snp=snp,
+                                    pop_info_disp=pop_info_disp,
+                                    filt=filt,
+                                    region_mean=region_mean,
+                                    region_std=region_std,
+                                    stat_value=stat_value)
 
     return render_template('visualisation.html', rs_value=rs_value, snp=snp)
 
