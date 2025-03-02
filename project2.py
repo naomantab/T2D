@@ -198,37 +198,9 @@ def visualisation(rs_value):
                     plt.scatter(
                         df[columns['bin_start']], df[columns['stat_column']],
                         alpha=0.6, label=query5, color='blue')
-                
-                ### for debugging
+        
 
-                # Debugging each part of the query
-                print(f"columns['chrom']: {columns['chrom']}")
-                print(f"columns['bin_start']: {columns['bin_start']}")
-                print(f"chromosome: {chromosome}")
-                print(f"lower: {lower}, upper: {upper}")
-                print(f"query5: {query5}")
-
-                # Construct the query and print it for debugging
-                query = db.session.query(StatModel).filter(
-                    getattr(StatModel, columns['chrom']) == chromosome,
-                    getattr(StatModel, columns['bin_start']).between(lower, upper)
-                )
-
-                # Check if population filter is needed
-                if query5 != "All":
-                    print(f"Adding population filter for {query5}")
-                    query = query.filter(getattr(StatModel, columns['population']) == query5)
-
-                # Execute the query and get the results
-                results = query.all()
-
-                # Print the SQL query and the results
-                print(f"Generated SQL Query: {str(query)}")  # To view the query being executed
-                print(f"Query Results: {results}")  # To check what is returned
-
-                ### ignore above
-
-                # for debugging
+                # 2 lines below for debugging
                 print(str(query))
                 print(filt)
 
