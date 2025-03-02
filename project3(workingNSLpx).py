@@ -7,7 +7,7 @@ import pandas as pd
 import os
 from io import BytesIO
 import base64
-
+import plotly.express as px 
 
 app = Flask(__name__)
 # below give link to database on cloud
@@ -124,15 +124,15 @@ def visualisation(rs_value):
     
     # get the query info
     if request.method == 'POST':
-         query5 = request.form.get('query5', '')
-         query6 = request.form.get('query6', '')
-         query7 = request.form.get('query7', '')
+        query5 = request.form.get('query5', '')
+        query6 = request.form.get('query6', '')
+        query7 = request.form.get('query7', '')
          
-         # display the poulation info
-         pop_info_disp = population_info.get(query5, "Please select a population")
+        # display the population info
+        pop_info_disp = population_info.get(query5, "Please select a population")
          
-         # if Tajimas or nSL stat is selected...
-         if query6 in ["Tajima's D", "nSL"]:
+        # if Tajimas or nSL stat is selected...
+        if query6 in ["Tajima's D", "nSL"]:
 
             if query6 == "Tajima's D":
                 StatModel = Tajima
@@ -153,92 +153,96 @@ def visualisation(rs_value):
                     "plot_title": "nSL"
                 }
 
+            # Calculate window boundaries
             window = (position // 10000) * 10000
             lower = window - (int(query7) * 1000)
             upper = window + (int(query7) * 1000)
 
-
+            # Query the DB
             if query5 == "All":
                 filt = db.session.query(StatModel).filter(
                     getattr(StatModel, columns['chrom']) == chromosome,
-                    getattr(StatModel, columns['bin_start']).between(lower, upper)).all()
-                print(filt)
-
+                    getattr(StatModel, columns['bin_start']).between(lower, upper)
+                ).all()
             else:
                 filt = db.session.query(StatModel).filter(
-                getattr(StatModel, columns['population']) == query5,
-                getattr(StatModel, columns['chrom']) == chromosome,
-                getattr(StatModel, columns['bin_start']).between(lower, upper)).all()
+                    getattr(StatModel, columns['population']) == query5,
+                    getattr(StatModel, columns['chrom']) == chromosome,
+                    getattr(StatModel, columns['bin_start']).between(lower, upper)
+                ).all()
 
             if filt:
                 df = pd.DataFrame([row.__dict__ for row in filt])
                 df.drop(columns=['_sa_instance_state'], inplace=True)
 
+                # Compute region stats
                 region_mean = round(df[columns['stat_column']].mean(), 4)
                 region_std = round(df[columns['stat_column']].std(), 4)
-                stat_value = next((getattr(row, columns['stat_column']) for row in filt if getattr(row, columns['bin_start']) == window))
-
+                stat_value = next(
+                    (getattr(row, columns['stat_column']) 
+                     for row in filt 
+                     if getattr(row, columns['bin_start']) == window),
+                    None
+                )
 
                 df[f"{columns['plot_title']} Mean (Selected Region)"] = region_mean
                 df[f"{columns['plot_title']} Std. (Selected Region)"] = region_std
                 df[columns['plot_title']] = stat_value
-                
-                print(df)
 
-                # Clear and plot (same structure, different labels)
-                plt.clf()
-                plt.figure(figsize=(10, 6))
+                # --- PLOTLY CODE ---
+                # Build an interactive scatter plot
+                # color by population if user selected "All"
+                color_col = columns['population'] if query5 == "All" else None
 
-                if query5 == "All":
-                    populations = df[columns['population']].unique()
-                    colors = plt.cm.get_cmap('tab10', len(populations))
+                fig = px.scatter(
+                    df,
+                    x=columns['bin_start'],
+                    y=columns['stat_column'],
+                    color=color_col,  # color by population only if "All"
+                    title=f"{columns['plot_title']} for Chromosome Window {window} ± {query7} kb",
+                    hover_data=[columns['bin_start'], columns['stat_column'], columns['population']]
+                )
+                fig.update_layout(
+                    xaxis_title=f"Chromosome {chromosome} Region (bp)",
+                    yaxis_title=columns['plot_title']
+                )
 
-                    for idx, population in enumerate(populations):
-                        population_data = df[df[columns['population']] == population]
-                        plt.scatter(
-                            population_data[columns['bin_start']], population_data[columns['stat_column']],
-                            alpha=0.6, label=population, color=colors(idx))
-                else:
-                    plt.scatter(
-                        df[columns['bin_start']], df[columns['stat_column']],
-                        alpha=0.6, label=query5, color='blue')
-        
+                # Add horizontal lines (threshold, region mean)
+                # Plotly's add_hline is in plotly.graph_objects.Figure
+                # but we can do it via fig.add_hline():
+                fig.add_hline(y=-2, line_color="red", annotation_text="Threshold (-2)", annotation_position="bottom left")
+                fig.add_hline(y=region_mean, line_color="green", annotation_text="Region Mean", annotation_position="bottom left")
 
-                line1 = plt.axhline(y=-2, color='red', linestyle='-', label='Threshold (-2)')
-                line2 = plt.axhline(y=region_mean, color='green', linestyle='-', label='Region Mean')
-                plt.xlabel(f"Chromosome {chromosome} Region (bp)")
-                plt.ylabel(columns['plot_title'])
-                legend1 = plt.legend(loc='lower right', title='Legend')
-                plt.gca().add_artist(legend1)
-                plt.title(f"{columns['plot_title']} for Chromosome Window {window} ± {query7} kb")
-                plt.tight_layout()
+                # Convert to HTML for rendering in the template
+                plot_html = fig.to_html(full_html=False)
 
-                buf = BytesIO()
-                plt.savefig(buf, format="png")
-                plt.close()
-
+                # Handle the "Download TSV" request
                 if 'download' in request.form:
                     tsv_buffer = BytesIO()
                     df.to_csv(tsv_buffer, index=False, sep="\t")
                     tsv_buffer.seek(0)
-                    return send_file(tsv_buffer,
-                                    mimetype="text/tab-separated-values",
-                                    as_attachment=True,
-                                    download_name=f"{columns['plot_title']}_{rs_value}.tsv")
+                    return send_file(
+                        tsv_buffer,
+                        mimetype="text/tab-separated-values",
+                        as_attachment=True,
+                        download_name=f"{columns['plot_title']}_{rs_value}.tsv"
+                    )
 
-                data = base64.b64encode(buf.getbuffer()).decode("ascii")
+                # Return the Plotly HTML in the template
+                return render_template(
+                    'visualisation2.html',  # <-- A separate template or rename existing
+                    rs_value=rs_value,
+                    plot_html=plot_html,
+                    snp=snp,
+                    pop_info_disp=pop_info_disp,
+                    filt=filt,
+                    region_mean=region_mean,
+                    region_std=region_std,
+                    stat_value=stat_value
+                )
 
-                return render_template('visualisation.html',
-                                    rs_value=rs_value,
-                                    image_data=data,
-                                    snp=snp,
-                                    pop_info_disp=pop_info_disp,
-                                    filt=filt,
-                                    region_mean=region_mean,
-                                    region_std=region_std,
-                                    stat_value=stat_value)
-
-    return render_template('visualisation.html', rs_value=rs_value, snp=snp)
+    # Default GET request or no data
+    return render_template('visualisation2.html', rs_value=rs_value, snp=snp)
 
 
 @app.route('/query/visualisation/<rs_value>/download', methods=['GET', 'POST'])
