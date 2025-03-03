@@ -53,6 +53,7 @@
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/query">Query</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
                 </ul>
             </div>
         </div>
@@ -64,7 +65,6 @@
         <p>See more details on
             <a href="https://www.genecards.org/cgi-bin/carddisp.pl?gene={{ mapped_gene }}" target="_blank">{{ mapped_gene }}</a>.
         </p>
-
         <h2>Results</h2>
         {% if ontology_results %}
         <input type="text" id="tableFilter" class="form-control mb-3" placeholder="Add filter here...">
@@ -100,8 +100,6 @@
 
         <a href="/" class="btn btn-primary">Back to Home</a>
     </div>
-
-    <script src="/static/js/filter.js"></script>
 
     <script>
         $(document).ready(function() {

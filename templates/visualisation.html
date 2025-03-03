@@ -39,6 +39,11 @@
         text-align: center;
         margin-bottom: 30px;
     }
+
+    .accessibility-controls {
+        margin-top: 10px;
+        text-align: center;
+    }
 </style>
 
 <body>
@@ -53,7 +58,7 @@
         <div class="container">
             <a class="navbar-brand" href="#">
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo">
-                <span class="brand-text">T2D Jammy Jellyfish</span>
+                <span class="brand-text">T2D SNP ATLAS</span>
             </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -62,13 +67,14 @@
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
                     <li class="nav-item"><a class="nav-link" href="/query">Query</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
     <div class="container">
-        <h2 class="text-center">Positive Selection Summary Statistics for <strong>{{rs_value}}</strong></h2>
+        <h2 class="text-center">Positive Selection Summary Statistics for <strong>{{ rs_value }}</strong></h2>
         <div class="box">
             Select South Asian Population and Summary Statistic
         </div>
@@ -87,15 +93,15 @@
             </div>
             <div class="form-group">
                 <label for="query">Choose Summary Statistic: </label>
-                <input type="text" id="query6" list="stats_type" name="query6" value="{{request.form.get('query6','')}}" class="form-control">
+                <input type="text" id="query6" list="stats_type" name="query6" value="{{ request.form.get('query6','') }}" class="form-control">
                 <datalist id="stats_type">
-                    <option value="Tajima's D">
+                    <option value="Tajimas_D">
                     <option value="nSL">
                 </datalist>
             </div>
             <div class="form-group">
                 <label for="query">Choose Flanking Region (± kb):</label>
-                <input type="text" id="query7" list="Region_interest" name="query7" value="{{request.form.get('query7','')}}" class="form-control">
+                <input type="text" id="query7" list="Region_interest" name="query7" value="{{ request.form.get('query7','') }}" class="form-control">
                 <datalist id="Region_interest">
                     <option value="10">
                     <option value="25">
@@ -118,10 +124,10 @@
         <table id="snp-table" class="table table-striped">
             <thead class="thead-dark">
                 <tr>
-                    <th scope="col">SNP RS-Value</th>
+                    <th scope="col">SNP rs-Value</th>
+                    <th scope="col">Chromosome</th>
                     <th scope="col">Genomic Position/Coordinate</th>
                     <th scope="col">Mapped Gene Name</th>
-                    <th scope="col">Chromosome</th>
                     <th scope="col">P Value</th>
                     <th scope="col">Phenotype</th>
                     <th scope="col">Population</th>
@@ -130,11 +136,12 @@
             <tbody>
                 <tr>
                     <td>{{ snp.rs_value }}</td>
+                    <td>{{ snp.chr_id }}</td>
                     <td>{{ snp.gene_pos }}</td>
                     <td>
                         <a href="/query/ontology/{{ snp.mapped_gene }}" target="_blank">{{ snp.mapped_gene }}</a>
                     </td>
-                    <td>{{snp.chr_id}}</td>
+                    
                     <td>{{ snp.snp_p_value }}</td>
                     <td>{{ snp.snp_phenotype }}</td>
                     <td>{{ snp.snp_population }}</td>
@@ -144,31 +151,72 @@
 
         <br><br>
 
-        <!-- Display the plot image-->
-        <img src="data:image/png;base64,{{ image_data }}" class="img-fluid">
+        <!-- Display the plotly plot -->
+        <div id="plotly-plot">
+            {{ plot_html|safe }}
+        </div>
 
         <br><br>
-        <h2 class="text-center">SNP Query Summary Statistics</h2>
-        <table id="SMP_query_results" class="table table-striped">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">SNP RS-Value</th>
-                    <th scope="col">Genomic Position/Coordinate</th>
-                    <th scope="col">Chromosome</th>
-                    <th scope="col">Tajima's D</th>
-                    <th scope="col">Tajima's D Mean (selected region)</th>
-                    <th scope="col">Tajima's D Standard Deviation (Selected region)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>{{ snp.rs_value }}</td>
-                    <td>{{ snp.gene_pos }}</td>
-                    <td>{{snp.chr_id}}</td>
-                </tr>
-            </tbody>
-        </table>
+        {% if filt %}
+            <form method="get" action="{{ url_for('download_stats', rs_value=rs_value) }}">
+                <input type="hidden" name="pop" value="{{ request.form.get('query5', 'All') }}">
+                <input type="hidden" name="window" value="{{ request.form.get('query7', 10) }}">
+                <input type="hidden" name="stat" value="{{ request.form.get('query6', 'Tajima\'s D') }}">
+                <button type="submit" class="btn btn-primary">
+                    Download {{ request.form.get('query6', 'Tajimas_D') }} (TSV)
+                </button>
+            </form>
+
+            <h2 class="text-center">SNP Query Summary Statistics of Region of Interest</h2>
+            <table id="SNP_query_results" class="table table-striped">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">SNP rs-value</th>
+                        <th scope="col">Chromosome</th>
+                        <th scope="col">Genomic Position/Coordinate</th>
+                        <th scope="col">{{stat_title}}</th>
+                        <th scope="col">{{stat_title}} Mean (selected region)</th>
+                        <th scope="col">{{stat_title}} Standard Deviation (Selected region)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ snp.rs_value }}</td>
+                        <td>{{ snp.chr_id }}</td>
+                        <td>{{ snp.gene_pos }}</td>
+                        <td>{{ final_stat }}</td>
+                        <td>{{ region_mean }}</td>
+                        <td>{{ region_std }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        {% endif %}
     </div>
+
+<!-- Accessibility Controls JS-->
+    <script>
+        let fontSize = 16;
+        const body = document.querySelector('body');
+        
+        function increaseFont() {
+            fontSize += 2;
+            body.style.fontSize = fontSize + 'px';
+        }
+
+        function decreaseFont() {
+            fontSize -= 2;
+            body.style.fontSize = fontSize + 'px';
+        }
+
+        document.getElementById('darkModeBtn').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                this.textContent = "🌞";
+            } else {
+                this.textContent = "🌙";
+            }
+        });
+    </script>
 </body>
 
 </html>
