@@ -9,7 +9,7 @@ Date: March 2025
 """
 
 # import all relevant modules 
-from flask import Flask, jsonify, render_template, request, send_file
+from flask import Flask, render_template, request, send_file
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
 import os
