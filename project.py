@@ -109,7 +109,7 @@ def query():
         # Join 2 tables and query using the input
         # return all information matching any parameter entered
         if query1 or query2 or query3 or query4:
-            snps = db.session.query(SNP, SNP_sumstat).outerjoin(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
+            snps = db.session.query(SNP, SNP_sumstat).join(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
                 (SNP.rs_value == query1) | 
                 (SNP.gene_pos == query2) | 
                 (SNP.snp_population == query4) |
