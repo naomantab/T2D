@@ -18,35 +18,36 @@
     }
   </style>
   <script>
-    function createSeqVizViewer(containerId, name, sequence) {
-      // Find all occurrences of 'J' in the sequence
-      let annotations = [];
-      for (let i = 0; i < sequence.length; i++) {
-        if (sequence[i] === "{{ snp_data.rs_position }}") {
-          annotations.push({
-            name: "Highlighted J",
-            start: i,
-            end: i + 1,
-            color: "red"
-          });
-        }
-      }
+    function createSeqVizViewer(containerId, name, sequence, snpRelativePosition) {
+        const annotations = [
+            {
+                name: "SNP Position",
+                start: snpRelativePosition - 1, // seqviz uses 0-based index
+                end: snpRelativePosition,       // this covers exactly 1 base
+                color: "red"
+            }
+        ];
 
-      // Initialize seqviz viewer
-      new window.seqviz.Viewer(containerId, {
-        name: name,
-        seq: sequence,
-        annotations: annotations
-      }).render();
+        new window.seqviz.Viewer(containerId, {
+            name: name,
+            seq: sequence,
+            annotations: annotations
+        }).render();
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const sequence = "{{ snp_data.sequence }}";
+        const rsid = "{{ snp_data.rsid }}";
+        const snpPosition = parseInt("{{ snp_position }}", 10);
+        const regionStart = parseInt("{{ region_start }}", 10);
+        const relativeSnpPosition = snpPosition - regionStart + 1;
+
+        createSeqVizViewer("root", rsid, sequence, relativeSnpPosition);
+    });
   </script>
 </head>
 <body>
   <h1>Sequence Visualisation for {{ snp_data.rsid }}</h1>
   <div id="root"></div>
-  <script>
-    // Pass sequence data dynamically
-    createSeqVizViewer("root", "{{ snp_data.rsid }}", "{{ snp_data.sequence }}");
-  </script>
 </body>
 </html>
