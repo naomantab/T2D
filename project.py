@@ -17,6 +17,7 @@ from io import BytesIO
 import base64
 import plotly.express as px
 import numpy as np
+import requests
 
 # intitalise the flask app
 app = Flask(__name__)
@@ -480,7 +481,60 @@ def download_stats(rs_value):
         mimetype="text/tab-separated-values",
         as_attachment=True,
         download_name=filename
+
     )
+def fetch_snp_sequence(rsid):
+    """Fetch SNP location, sequence, and modify the SNP position."""
+    base_url = f"https://rest.ensembl.org/variation/homo_sapiens/{rsid}?content-type=application/json"
+    response = requests.get(base_url)
+    if response.status_code == 200:
+        data = response.json()
+        # Ensure that mappings are present
+        if "mappings" not in data or not data["mappings"]:
+            print("No mappings found for", rsid)
+            return None
+        mapping = data["mappings"][0]  # Use first mapping
+        chrom = mapping["seq_region_name"]
+        snp_position = mapping["start"]
+
+        # Define flanking region (±500bp)
+        flank_size = 500
+        region_start = max(1, snp_position - flank_size)
+        region_end = snp_position + flank_size
+
+        # Fetch sequence from Ensembl
+        sequence_url = f"https://rest.ensembl.org/sequence/region/human/{chrom}:{region_start}..{region_end}?content-type=text/plain"
+        seq_response = requests.get(sequence_url)
+        if seq_response.status_code == 200:
+            sequence = seq_response.text.strip()
+            snp_index = snp_position - region_start  # Adjust to 0-based index
+            if 0 <= snp_index < len(sequence):
+                modified_sequence = sequence[:snp_index] + 'J' + sequence[snp_index + 1:]
+                result = {
+                    "rsid": rsid,
+                    "chromosome": chrom,
+                    "start": region_start,
+                    "end": region_end,
+                    "sequence": modified_sequence
+                }
+                print("Fetched SNP data:", result)
+                return result
+            else:
+                print("SNP index out of bounds for", rsid)
+        else:
+            print("Failed to fetch sequence from Ensembl for", rsid)
+    else:
+        print("Failed to fetch SNP info for", rsid)
+    return None
+# New sequence visualisation route for displaying the SNP flanking sequence
+@app.route('/query/visualisation/<rs_value>/sequencevisualisation', methods=['GET'])
+def sequence_visualisation(rs_value):
+    snp_data = fetch_snp_sequence(rs_value)
+    if snp_data is not None:
+        return render_template("sequence_visualisation.html", snp_data=snp_data)
+    else:
+        return "Failed to fetch SNP data", 500
+
 
 if __name__ == '__main__':
     app.run(debug=True)
