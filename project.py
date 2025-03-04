@@ -509,7 +509,7 @@ def fetch_snp_sequence(rsid):
             sequence = seq_response.text.strip()
             snp_index = snp_position - region_start  # Adjust to 0-based index
             if 0 <= snp_index < len(sequence):
-                modified_sequence = sequence[:snp_index] + 'J' + sequence[snp_index + 1:]
+                modified_sequence = sequence
                 result = {
                     "rsid": rsid,
                     "chromosome": chrom,

@@ -22,7 +22,7 @@
       // Find all occurrences of 'J' in the sequence
       let annotations = [];
       for (let i = 0; i < sequence.length; i++) {
-        if (sequence[i] === 'J') {
+        if (sequence[i] === "{{ snp_data.rs_position }}") {
           annotations.push({
             name: "Highlighted J",
             start: i,
