@@ -17,6 +17,7 @@ from io import BytesIO
 import base64
 import plotly.express as px
 import numpy as np
+import requests
 
 # intitalise the flask app
 app = Flask(__name__)
@@ -321,9 +322,10 @@ def visualisation(rs_value):
                     color_col = 'nsl_sa_pop' if query5 == "All" else None
                     # dynamic title
                     if query5 == "All":
-                        plot_title = f"Tajima's D for Chromosome Window {window} ± {query7} kb (All Populations)"
+                        plot_title = f"nSL for Chromosome Window {window} ± {query7} kb (All Populations)"
                     else:
-                        plot_title = f"Tajima's D for Chromosome Window {window} ± {query7} kb ({query5} Population)"
+                        plot_title = f"nSL
+                         for Chromosome Window {window} ± {query7} kb ({query5} Population)"
 
 
                     # plot based on dataframe from query
@@ -353,12 +355,13 @@ def visualisation(rs_value):
                     # update the hover data to use more readable
                     fig.update_traces(
                         hovertemplate=(
-                        "<b>Chromosome Position:</b> %{x}<br>"  # Bin start (Chromosome Position)
-                        "<b>Tajima's D Value:</b> %{y}<br>"  # Tajima's D value
+                        "<b>Chromosome Position:</b> %{x}<br>"  # Chromosome Position
+                        "<b>nSL Value:</b> %{y}<br>"  # nSL value
                         )
                     )
                     # add horizontal lines (threshold, region mean)
-                    fig.add_hline(y=-2, line_color="red", annotation_text="Threshold (-2)", annotation_position="bottom left")
+                    fig.add_hline(y=-2, line_color="red", annotation_text="Threshold (+2)", annotation_position="bottom left")
+                    fig.add_hline(y=2, line_color="red", annotation_text="Threshold (-2)", annotation_position="bottom left")
                     fig.add_hline(y=region_mean, line_color="green", annotation_text="Region Mean", annotation_position="bottom left")
                     # vertical line for snp of interest
                     fig.add_vline(x=position, line=dict(color="black", width=2, dash="dash"))
@@ -480,7 +483,63 @@ def download_stats(rs_value):
         mimetype="text/tab-separated-values",
         as_attachment=True,
         download_name=filename
+
     )
+
+def fetch_snp_sequence(rsid):
+    """Fetch SNP location, sequence, and modify the SNP position."""
+    base_url = f"https://rest.ensembl.org/variation/homo_sapiens/{rsid}?content-type=application/json"
+    response = requests.get(base_url)
+    if response.status_code == 200:
+        data = response.json()
+
+        if "mappings" not in data or not data["mappings"]:
+            print(f"No mappings found for {rsid}")
+            return None
+
+        mapping = data["mappings"][0]
+        chrom = mapping["seq_region_name"]
+        snp_position = mapping["start"]
+
+        flank_size = 500
+        region_start = max(1, snp_position - flank_size)
+        region_end = snp_position + flank_size
+
+        sequence_url = (
+            f"https://rest.ensembl.org/sequence/region/human/"
+            f"{chrom}:{region_start}..{region_end}?content-type=text/plain"
+        )
+        seq_response = requests.get(sequence_url)
+        if seq_response.status_code == 200:
+            sequence = seq_response.text.strip()
+
+            result = {
+                "rsid": rsid,
+                "chromosome": chrom,
+                "start": region_start,
+                "snp_position": snp_position,
+                "sequence": sequence
+            }
+            return result
+        else:
+            print(f"Failed to fetch sequence for {rsid}")
+    else:
+        print(f"Failed to fetch SNP info for {rsid}")
+    return None
+
+@app.route('/query/visualisation/<rs_value>/sequencevisualisation', methods=['GET'])
+def sequence_visualisation(rs_value):
+    snp_data = fetch_snp_sequence(rs_value)
+    if snp_data:
+        return render_template(
+            "sequence_visualisation.html",
+            snp_data=snp_data,
+            region_start=snp_data["start"],
+            snp_position=snp_data["snp_position"]
+        )
+    return "Failed to fetch SNP data", 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+# test comment
