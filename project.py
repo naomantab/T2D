@@ -32,13 +32,13 @@ db = SQLAlchemy(app)
 
 # class with SNP data with all populations
 class SNP(db.Model):
-    __tablename__ = 'SNP_ALL'
-    rs_value = db.Column('SNPS', db.String(100), unique=True, primary_key=True)
+    __tablename__ = 'SNP'
+    rs_value = db.Column('SNP_rsID', db.String(100), unique=True, primary_key=True)
     gene_pos = db.Column('CHR_POS', db.Integer, unique=True)
     mapped_gene = db.Column('MAPPED_GENE', db.String(100), nullable=True)
     snp_p_value = db.Column('P-VALUE', db.Float, nullable=True)
     snp_phenotype = db.Column('MAPPED_TRAIT', db.String, nullable=True)
-    snp_population = db.Column('General Ancestry', db.String, nullable=True)
+    snp_population = db.Column('GENERAL ANCESTRY', db.String, nullable=True)
     chr_id = db.Column('CHR_ID', db.Integer, nullable=True)
 
 # class with ontology data
@@ -47,19 +47,13 @@ class Ontology(db.Model):
     go_id = db.Column('GO_ID', db.String(50), nullable=True, primary_key=True)
     gene_name = db.Column('Gene_Name', db.String(100), nullable=True)
     qualifier = db.Column('Qualifier', db.String(50), nullable=True)
-    gene_function = db.Column('Gene_Function', db.String(255), nullable=True)
+    gene_function = db.Column('Gene_Description', db.String(255), nullable=True)
     evidence_code = db.Column('Evidence_Code', db.String(50), nullable=True)
     aspect = db.Column('Aspect', db.String(5), nullable=True)
 
-# class with population information
-class PopulationData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    population_name = db.Column(db.String(100), nullable=False)
-    statistics = db.Column(db.String(100), nullable=True)
-
 # class for gene wide summary statistics
 class SNP_sumstat(db.Model):
-    __tablename__ = 'SNP_STATS'
+    __tablename__ = 'SNP_risk_stats'
     mapped_gene_stats = db.Column('MAPPED_GENE', db.String(100), nullable=True, primary_key=True)
     risk_mean = db.Column('MEAN_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
     risk_std = db.Column('STD_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
@@ -83,10 +77,11 @@ class NSL(db.Model):
     nsl_sa_pop = db.Column('population', db.String(50))
     nsl_pos = db.Column('Physical_Position', db.Integer)
     
+# class with population information
 class pop_info(db.Model):
-    __tablename__ = 'population_info'
-    p_type = db.Column('population', db.String(50), primary_key=True)
-    p_desc = db.Column('description', db.String(50))
+    __tablename__ = 'population'
+    p_type = db.Column('sampling_location', db.String(50), primary_key=True)
+    p_desc = db.Column('population_description', db.String(50))
 
 # home page
 @app.route('/')
@@ -114,7 +109,7 @@ def query():
         # Join 2 tables and query using the input
         # return all information matching any parameter entered
         if query1 or query2 or query3 or query4:
-            snps = db.session.query(SNP, SNP_sumstat).join(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
+            snps = db.session.query(SNP, SNP_sumstat).outerjoin(SNP_sumstat, SNP.mapped_gene == SNP_sumstat.mapped_gene_stats).filter(
                 (SNP.rs_value == query1) | 
                 (SNP.gene_pos == query2) | 
                 (SNP.snp_population == query4) |
@@ -324,8 +319,7 @@ def visualisation(rs_value):
                     if query5 == "All":
                         plot_title = f"nSL for Chromosome Window {window} ± {query7} kb (All Populations)"
                     else:
-                        plot_title = f"nSL
-                         for Chromosome Window {window} ± {query7} kb ({query5} Population)"
+                        plot_title = f"nSL for Chromosome Window {window} ± {query7} kb ({query5} Population)"
 
 
                     # plot based on dataframe from query

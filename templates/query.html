@@ -126,7 +126,12 @@
                     
                   </td>
                   <td>{{snp.chr_id}}</td>
-                  <td>{{ snp_stat.risk_mean }} &#177; {{ snp_stat.risk_std }}</td>
+                  <td>
+                    {% if sumstat %}
+                      {{ snp_stat.risk_mean }} &#177; {{ snp_stat.risk_std }}
+                    {% else %}
+                        <em>No stats available</em>
+                    {% endif %}</td>
                   <td>{{ snp.snp_p_value }}</td>
                   <td>{{ snp.snp_phenotype }}</td>
                   <td>{{ snp.snp_population }}</td>
