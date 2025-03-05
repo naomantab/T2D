@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<link rel="icon" sizes="180x180" href="{{ url_for('static', filename='logo.png') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,7 +67,6 @@
         </p>
         <h2>Results</h2>
         {% if ontology_results %}
-        <input type="text" id="tableFilter" class="form-control mb-3" placeholder="Add filter here...">
         <table id="ontology-table" class="table table-striped">
             <thead class="thead-dark">
                 <tr>

@@ -35,7 +35,7 @@ This project involves the development of a **web-based software tool** to handle
   - [T2D Knowledge Portal](https://t2d.hugeamp.org)
   - [International Genome Sample Resource](https://www.internationalgenome.org/)
   - [Gene Ontology Database](https://geneontology.org/)
-- **Visualization:** Matplotlib
+- **Visualization:** Plotly
 
 
 ## ⚙️ Installation & Usage
