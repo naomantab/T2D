@@ -101,9 +101,9 @@
               <thead class="thead-dark">
                 <tr>
                   <th scope="col" col-index = 1>SNP RS-Value</th>
-                  <th scope="col" col-index = 2>Genomic Position/Coordinate</th>
-                  <th scope="col" col-index = 3>Mapped Gene Name</th>
-                  <th scope="col" col-index = 4>Chromosome</th>
+                  <th scope="col" col-index = 2>Chromosome</th>
+                  <th scope="col" col-index = 3>Genomic Position/Coordinate</th>
+                  <th scope="col" col-index = 4>Mapped Gene Name</th>
                   <th scope="col" col-index = 5>Risk Allele Frequency Mean &#177; Std</th>
                   <th scope="col" col-index = 6>P Value</th>
                   <th scope="col" col-index = 7>Phenotype</th>
@@ -117,21 +117,18 @@
                     </a>
                     
                   </td>
+                  <td>{{snp.chr_id}}</td>
                   <td>{{ snp.gene_pos }}</td>
-
                   <td>
                     <a href="/query/ontology/{{ snp.mapped_gene }}" target="_blank">
                       {{ snp.mapped_gene }}
-                    </a>
-                    
-                  </td>
-                  <td>{{snp.chr_id}}</td>
+                    </a></td>
                   <td>
-                    {% if sumstat %}
-                      {{ snp_stat.risk_mean }} &#177; {{ snp_stat.risk_std }}
+                    {% if snp_stat and snp_stat.risk_mean is not none %}
+                        {{ snp_stat.risk_mean|round(3) }} &#177; {{ snp_stat.risk_std|round(3) }}
                     {% else %}
                         <em>No stats available</em>
-                    {% endif %}</td>
+                    {% endif %}
                   <td>{{ snp.snp_p_value }}</td>
                   <td>{{ snp.snp_phenotype }}</td>
                   <td>{{ snp.snp_population }}</td>
