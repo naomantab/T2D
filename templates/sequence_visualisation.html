@@ -101,52 +101,48 @@
         <div id="root"></div>
     </div>
 
-    <!-- JavaScript for SeqViz -->
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Retrieve data from template variables
-            const sequence = "{{ snp_data.sequence }}";
-            const rsid = "{{ snp_data.rsid }}";
-            const snpPosition = parseInt("{{ snp_position }}", 10);
-            const regionStart = parseInt("{{ region_start }}", 10);
-            const alleleString = "{{ snp_data.allele_string }}";
+            
+             sequence = "{{ snp_data.sequence }}";
+             rsid = "{{ snp_data.rsid }}";
+             snpPosition = parseInt("{{ snp_position }}", 10);
+             regionStart = parseInt("{{ region_start }}", 10);
+             alleleString = "{{ snp_data.allele_string }}";
+             relativeSnpPosition = snpPosition - regionStart + 1;
 
-            // Calculate relative SNP position for a 0-based index
-            const relativeSnpPosition = snpPosition - regionStart + 1;
-
-            // Define viewer properties with the SNP annotation
-            const props = {
+            
+               props = {
                 name: rsid,
                 seq: sequence,
                 showComplement: false,
                 range: {
-                    start: Math.max(relativeSnpPosition - 100, 0), // Ensure start is not negative
-                    end: Math.min(relativeSnpPosition + 100, sequence.length) // Ensure end is within sequence bounds
+                    start: Math.max(relativeSnpPosition - 100, 0), 
+                    end: Math.min(relativeSnpPosition + 100, sequence.length) 
                 },
                 annotations: [
                     {
                         name: "SNP Position of " + rsid + " in blue. The allele strings are: " + alleleString,
-                        start: relativeSnpPosition - 1, // 0-based index start
-                        end: relativeSnpPosition,       // Covers exactly 1 base
+                        start: relativeSnpPosition - 1, 
+                        end: relativeSnpPosition,      
                         color: "blue"
                     },
                     {
                         name: "Full Region",
-                        start: Math.max(relativeSnpPosition - 500, 0), // Ensures start is not negative
-                        end: Math.min(relativeSnpPosition + 500, sequence.length), // Ensures end is within sequence
+                        start: Math.max(relativeSnpPosition - 500, 0), 
+                        end: Math.min(relativeSnpPosition + 500, sequence.length),
                         color: "maroon"
                     }
                 ],
                 bpColors: { A: "orange", T: "blue", C: "purple", G: "green" }
             };
 
-            // Create the viewer instance and render the sequence visualization
             window.seqviz
                 .Viewer("root", props)
                 .render();
         });
 
-        // Accessibility Features: Dark Mode & Font Sizing
         let fontSize = 16;
         const body = document.querySelector('body');
 
