@@ -32,13 +32,13 @@ db = SQLAlchemy(app)
 
 # class with SNP data with all populations
 class SNP(db.Model):
-    __tablename__ = 'SNP_ALL'
-    rs_value = db.Column('SNPS', db.String(100), unique=True, primary_key=True)
+    __tablename__ = 'SNP'
+    rs_value = db.Column('SNP_rsID', db.String(100), unique=True, primary_key=True)
     gene_pos = db.Column('CHR_POS', db.Integer, unique=True)
     mapped_gene = db.Column('MAPPED_GENE', db.String(100), nullable=True)
     snp_p_value = db.Column('P-VALUE', db.Float, nullable=True)
     snp_phenotype = db.Column('MAPPED_TRAIT', db.String, nullable=True)
-    snp_population = db.Column('General Ancestry', db.String, nullable=True)
+    snp_population = db.Column('GENERAL ANCESTRY', db.String, nullable=True)
     chr_id = db.Column('CHR_ID', db.Integer, nullable=True)
 
 # class with ontology data
@@ -47,19 +47,13 @@ class Ontology(db.Model):
     go_id = db.Column('GO_ID', db.String(50), nullable=True, primary_key=True)
     gene_name = db.Column('Gene_Name', db.String(100), nullable=True)
     qualifier = db.Column('Qualifier', db.String(50), nullable=True)
-    gene_function = db.Column('Gene_Function', db.String(255), nullable=True)
+    gene_function = db.Column('Gene_Description', db.String(255), nullable=True)
     evidence_code = db.Column('Evidence_Code', db.String(50), nullable=True)
     aspect = db.Column('Aspect', db.String(5), nullable=True)
 
-# class with population information
-class PopulationData(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    population_name = db.Column(db.String(100), nullable=False)
-    statistics = db.Column(db.String(100), nullable=True)
-
 # class for gene wide summary statistics
 class SNP_sumstat(db.Model):
-    __tablename__ = 'SNP_STATS'
+    __tablename__ = 'SNP_risk_stats'
     mapped_gene_stats = db.Column('MAPPED_GENE', db.String(100), nullable=True, primary_key=True)
     risk_mean = db.Column('MEAN_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
     risk_std = db.Column('STD_RISK_ALLELE_FREQUENCY', db.Float, nullable=True)
@@ -83,10 +77,11 @@ class NSL(db.Model):
     nsl_sa_pop = db.Column('population', db.String(50))
     nsl_pos = db.Column('Physical_Position', db.Integer)
     
+# class with population information
 class pop_info(db.Model):
-    __tablename__ = 'population_info'
-    p_type = db.Column('population', db.String(50), primary_key=True)
-    p_desc = db.Column('description', db.String(50))
+    __tablename__ = 'population'
+    p_type = db.Column('sampling_location', db.String(50), primary_key=True)
+    p_desc = db.Column('population_description', db.String(50))
 
 # home page
 @app.route('/')
@@ -322,9 +317,9 @@ def visualisation(rs_value):
                     color_col = 'nsl_sa_pop' if query5 == "All" else None
                     # dynamic title
                     if query5 == "All":
-                        plot_title = f"Tajima's D for Chromosome Window {window} ± {query7} kb (All Populations)"
+                        plot_title = f"nSL for Chromosome Window {window} ± {query7} kb (All Populations)"
                     else:
-                        plot_title = f"Tajima's D for Chromosome Window {window} ± {query7} kb ({query5} Population)"
+                        plot_title = f"nSL for Chromosome Window {window} ± {query7} kb ({query5} Population)"
 
 
                     # plot based on dataframe from query
@@ -354,12 +349,13 @@ def visualisation(rs_value):
                     # update the hover data to use more readable
                     fig.update_traces(
                         hovertemplate=(
-                        "<b>Chromosome Position:</b> %{x}<br>"  # Bin start (Chromosome Position)
-                        "<b>Tajima's D Value:</b> %{y}<br>"  # Tajima's D value
+                        "<b>Chromosome Position:</b> %{x}<br>"  # Chromosome Position
+                        "<b>nSL Value:</b> %{y}<br>"  # nSL value
                         )
                     )
                     # add horizontal lines (threshold, region mean)
-                    fig.add_hline(y=-2, line_color="red", annotation_text="Threshold (-2)", annotation_position="bottom left")
+                    fig.add_hline(y=-2, line_color="red", annotation_text="Threshold (+2)", annotation_position="bottom left")
+                    fig.add_hline(y=2, line_color="red", annotation_text="Threshold (-2)", annotation_position="bottom left")
                     fig.add_hline(y=region_mean, line_color="green", annotation_text="Region Mean", annotation_position="bottom left")
                     # vertical line for snp of interest
                     fig.add_vline(x=position, line=dict(color="black", width=2, dash="dash"))
@@ -554,8 +550,6 @@ def sequence_visualisation(rs_value):
     
     return "Failed to fetch SNP data", 500
 
-if __name__ == '__main__':
-    app.run(debug=True)
 if __name__ == '__main__':
     app.run(debug=True)
 
