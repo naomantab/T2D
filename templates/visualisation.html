@@ -17,9 +17,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
 
-    <a href="/query/visualisation/{{ snp.rs_value }}/sequencevisualisation" class="btn btn-primary">
-        Sequence Visualisation
-      </a>
       
 </head>
 
@@ -66,6 +63,9 @@
                 <img src="{{ url_for('static', filename='logo.png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo">
                 <span class="brand-text">T2D SNP ATLAS</span>
             </a>
+            <a href="/query/visualisation/{{ snp.rs_value }}/sequencevisualisation" class="btn btn-primary">
+                Sequence Visualisation
+              </a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
