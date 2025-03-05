@@ -226,7 +226,7 @@ def visualisation(rs_value):
                     # update legend title if all populations selected
                     if query5 == "All":
                         fig.update_layout(
-                            legend_title="Populations:"  # Change legend title
+                            legend_title="Populations:"  # x legend title
                         )
                     fig.update_layout(
                         xaxis_title = f"Chromosome {chromosome} Region (bp)",
@@ -480,76 +480,69 @@ def download_stats(rs_value):
         download_name=filename
 
     )
-
 def fetch_snp_sequence(rsid):
-    """Fetch SNP location, sequence, and modify the SNP position using mapping keys."""
+    """Fetch SNP location, sequence, and ancestral allele."""
     base_url = f"https://rest.ensembl.org/variation/homo_sapiens/{rsid}?content-type=application/json"
     response = requests.get(base_url)
+    
     if response.status_code == 200:
         data = response.json()
-        mapping = data["mappings"][0]
-        allele_string = mapping.get("allele_string", "N/A")
-        print("HELLO!!!!")
-        allele_string = mapping.get("allele_string", "N/A")
-        print(allele_string)
-        # Check if mappings exist and have data
-        if "mappings" not in data or len(data["mappings"]) == 0:
-            print(f"No SNP mapping data found for {rsid}")
+        
+        # Extract allele string and ancestral allele
+        allele_string = data.get("mappings", [{}])[0].get("allele_string", "N/A")
+        ancestral_allele = data.get("mappings", [{}])[0].get("ancestral_allele", "Unknown")
+
+        # Extract SNP location details
+        if "mappings" not in data or not data["mappings"]:
             return None
 
-        # Use the first mapping for the SNP info
         mapping = data["mappings"][0]
-        if "seq_region_name" not in mapping or "start" not in mapping:
-            print(f"No SNP data found for {rsid} in mapping")
+        chrom = mapping.get("seq_region_name")
+        snp_position = mapping.get("start")
+
+        if not chrom or not snp_position:
             return None
 
-        chrom = mapping["seq_region_name"]
-        snp_position = mapping["start"]
-
-        # Set flank size to 500 on either side of the SNP
+        # Define the flanking region
         flank_size = 500
         region_start = max(1, snp_position - flank_size)
         region_end = snp_position + flank_size
 
-        sequence_url = (
-            f"https://rest.ensembl.org/sequence/region/human/"
-            f"{chrom}:{region_start}..{region_end}?content-type=text/plain"
-        )
+        # Fetch sequence
+        sequence_url = f"https://rest.ensembl.org/sequence/region/human/{chrom}:{region_start}..{region_end}?content-type=text/plain"
         seq_response = requests.get(sequence_url)
+        
         if seq_response.status_code == 200:
             sequence = seq_response.text.strip()
-            result = {
+            return {
                 "rsid": rsid,
                 "chromosome": chrom,
                 "start": region_start,
                 "snp_position": snp_position,
-                "allele_string" : allele_string,
+                "allele_string": allele_string,
+                "ancestral_allele": ancestral_allele,  # Include ancestral allele
                 "sequence": sequence
-                 
             }
-            return result
-        else:
-            print(f"Failed to fetch sequence for {rsid}")
-    else:
-        print(f"Failed to fetch SNP info for {rsid}")
+    
     return None
 
 @app.route('/query/visualisation/<rs_value>/sequencevisualisation', methods=['GET'])
 def sequence_visualisation(rs_value):
     snp_data = fetch_snp_sequence(rs_value)
+    
     if snp_data:
-        print("hello!!")
-        print(json.dumps(snp_data, indent=6))  # Pretty print to check structure
         return render_template(
             "sequence_visualisation.html",
             snp_data=snp_data,
             region_start=snp_data["start"],
-            snp_position=snp_data["snp_position"]
-            
+            snp_position=snp_data["snp_position"],
+            ancestral_allele=snp_data["ancestral_allele"]  # Pass ancestral allele
         )
-    
-    
+
     return "Failed to fetch SNP data", 500
+
+    
+ 
 
 if __name__ == '__main__':
     app.run(debug=True)
