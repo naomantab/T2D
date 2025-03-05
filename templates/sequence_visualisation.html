@@ -1,53 +1,183 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sequence Visualisation for {{ snp_data.rsid }}</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://unpkg.com/seqviz"></script>
-  <style>
-    body {
-      margin: 20px;
-      font-family: Arial, sans-serif;
-    }
-    #root {
-      height: 500px;
-      width: 100%;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-  </style>
-  <script>
-    function createSeqVizViewer(containerId, name, sequence, snpRelativePosition) {
-        const annotations = [
-            {
-                name: "SNP Position",
-                start: snpRelativePosition - 1, // seqviz uses 0-based index
-                end: snpRelativePosition,       // this covers exactly 1 base
-                color: "red"
-            }
-        ];
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sequence Visualisation for {{ snp_data.rsid }}</title>
 
-        new window.seqviz.Viewer(containerId, {
-            name: name,
-            seq: sequence,
-            annotations: annotations
-        }).render();
-    }
+    <!-- Bootstrap 4.4.1 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css">
+    
+    <!-- jQuery & Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const sequence = "{{ snp_data.sequence }}";
-        const rsid = "{{ snp_data.rsid }}";
-        const snpPosition = parseInt("{{ snp_position }}", 10);
-        const regionStart = parseInt("{{ region_start }}", 10);
-        const relativeSnpPosition = snpPosition - regionStart + 1;
+    <!-- SeqViz for Sequence Visualization -->
+    <script src="https://unpkg.com/seqviz"></script>
 
-        createSeqVizViewer("root", rsid, sequence, relativeSnpPosition);
-    });
-  </script>
+    <!-- Custom Styles -->
+    <style>
+        body {
+            margin: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .container-fluid {
+            margin-top: 20px;
+            width: 100%;
+        }
+        #root {
+            height: 500px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        /* Dark Mode */
+        .dark-mode {
+            background-color: #121212;
+            color: white;
+        }
+        /* Navbar Logo */
+        .nav-logo {
+            height: 40px;
+            margin-right: 10px;
+        }
+        /* Navbar buttons */
+        .navbar-buttons {
+            display: flex;
+            align-items: center;
+        }
+        .navbar-buttons button {
+            margin-left: 10px;
+            border: none;
+            background: none;
+            font-size: 18px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <h1>Sequence Visualisation for {{ snp_data.rsid }}</h1>
-  <div id="root"></div>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-info">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="{{ url_for('static', filename='logo.png') }}" alt="T2D Jammy Jellyfish Logo" class="nav-logo">
+                <span class="brand-text">T2D SNP ATLAS</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item active"><a class="nav-link" href="/query">Query <span class="sr-only">(current)</span></a></li>
+                    <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+                </ul>
+
+                <!-- Accessibility Buttons (Right Side of Navbar) -->
+                <div class="navbar-buttons">
+                    <button id="darkModeBtn">🌙</button>
+                    <button onclick="increaseFont()">A+</button>
+                    <button onclick="decreaseFont()">A-</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <br><br>
+
+    <!-- Sequence Visualization Section -->
+    <div class="container">
+        <h1 class="text-center">Sequence Visualisation for {{ snp_data.rsid }}</h1>
+        <h2 class="text-center">
+            Showing the SNP position of {{ snp_data.rsid }} in 
+            <span style="color: blue;">blue</span>. 
+            The allele strings are: {{ snp_data.allele_string }}
+        </h2>
+        <p>The sequence visualiser below shows the SNP and the region of the assoicated rsID extracted from the Ensembl database via the Ensembl REST API </p>
+        <p2>The graph below shows a range of ±500 with the SNP location at 501.</p2>
+        <p2> The genomic location of the SNP is on chromosome {{snp_data.chromosome}} at position {{ snp_position }}<p2>
+        <div id="root"></div>
+    </div>
+
+    <!-- JavaScript for SeqViz -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Retrieve data from template variables
+            const sequence = "{{ snp_data.sequence }}";
+            const rsid = "{{ snp_data.rsid }}";
+            const snpPosition = parseInt("{{ snp_position }}", 10);
+            const regionStart = parseInt("{{ region_start }}", 10);
+            const alleleString = "{{ snp_data.allele_string }}";
+
+            // Calculate relative SNP position for a 0-based index
+            const relativeSnpPosition = snpPosition - regionStart + 1;
+
+            // Define viewer properties with the SNP annotation
+            const props = {
+                name: rsid,
+                seq: sequence,
+                showComplement: false,
+                range: {
+                    start: Math.max(relativeSnpPosition - 100, 0), // Ensure start is not negative
+                    end: Math.min(relativeSnpPosition + 100, sequence.length) // Ensure end is within sequence bounds
+                },
+                annotations: [
+                    {
+                        name: "SNP Position of " + rsid + " in blue. The allele strings are: " + alleleString,
+                        start: relativeSnpPosition - 1, // 0-based index start
+                        end: relativeSnpPosition,       // Covers exactly 1 base
+                        color: "blue"
+                    },
+                    {
+                        name: "Full Region",
+                        start: Math.max(relativeSnpPosition - 500, 0), // Ensures start is not negative
+                        end: Math.min(relativeSnpPosition + 500, sequence.length), // Ensures end is within sequence
+                        color: "maroon"
+                    }
+                ],
+                bpColors: { A: "orange", T: "blue", C: "purple", G: "green" }
+            };
+
+            // Create the viewer instance and render the sequence visualization
+            window.seqviz
+                .Viewer("root", props)
+                .render();
+        });
+
+        // Accessibility Features: Dark Mode & Font Sizing
+        let fontSize = 16;
+        const body = document.querySelector('body');
+
+        function increaseFont() {
+            fontSize += 2;
+            body.style.fontSize = fontSize + 'px';
+        }
+
+        function decreaseFont() {
+            fontSize -= 2;
+            body.style.fontSize = fontSize + 'px';
+        }
+
+        document.getElementById('darkModeBtn').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            if (document.body.classList.contains('dark-mode')) {
+                this.textContent = "🌞";
+            } else {
+                this.textContent = "🌙";
+            }
+        });
+    </script>
+
+    <p class="text-center">
+        <a href="/query/visualisation/{{ snp_data.rsid }}/" class="btn btn-primary">Back to Query</a>
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js"></script>
+
 </body>
 </html>

@@ -18,7 +18,7 @@ import base64
 import plotly.express as px
 import numpy as np
 import requests
-
+import json
 # intitalise the flask app
 app = Flask(__name__)
 
@@ -485,20 +485,31 @@ def download_stats(rs_value):
     )
 
 def fetch_snp_sequence(rsid):
-    """Fetch SNP location, sequence, and modify the SNP position."""
+    """Fetch SNP location, sequence, and modify the SNP position using mapping keys."""
     base_url = f"https://rest.ensembl.org/variation/homo_sapiens/{rsid}?content-type=application/json"
     response = requests.get(base_url)
     if response.status_code == 200:
         data = response.json()
-
-        if "mappings" not in data or not data["mappings"]:
-            print(f"No mappings found for {rsid}")
+        mapping = data["mappings"][0]
+        allele_string = mapping.get("allele_string", "N/A")
+        print("HELLO!!!!")
+        allele_string = mapping.get("allele_string", "N/A")
+        print(allele_string)
+        # Check if mappings exist and have data
+        if "mappings" not in data or len(data["mappings"]) == 0:
+            print(f"No SNP mapping data found for {rsid}")
             return None
 
+        # Use the first mapping for the SNP info
         mapping = data["mappings"][0]
+        if "seq_region_name" not in mapping or "start" not in mapping:
+            print(f"No SNP data found for {rsid} in mapping")
+            return None
+
         chrom = mapping["seq_region_name"]
         snp_position = mapping["start"]
 
+        # Set flank size to 500 on either side of the SNP
         flank_size = 500
         region_start = max(1, snp_position - flank_size)
         region_end = snp_position + flank_size
@@ -510,13 +521,14 @@ def fetch_snp_sequence(rsid):
         seq_response = requests.get(sequence_url)
         if seq_response.status_code == 200:
             sequence = seq_response.text.strip()
-
             result = {
                 "rsid": rsid,
                 "chromosome": chrom,
                 "start": region_start,
                 "snp_position": snp_position,
+                "allele_string" : allele_string,
                 "sequence": sequence
+                 
             }
             return result
         else:
@@ -529,13 +541,21 @@ def fetch_snp_sequence(rsid):
 def sequence_visualisation(rs_value):
     snp_data = fetch_snp_sequence(rs_value)
     if snp_data:
+        print("hello!!")
+        print(json.dumps(snp_data, indent=6))  # Pretty print to check structure
         return render_template(
             "sequence_visualisation.html",
             snp_data=snp_data,
             region_start=snp_data["start"],
             snp_position=snp_data["snp_position"]
+            
         )
+    
+    
     return "Failed to fetch SNP data", 500
 
 if __name__ == '__main__':
     app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
+
