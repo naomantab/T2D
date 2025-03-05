@@ -19,6 +19,7 @@ import plotly.express as px
 import numpy as np
 import requests
 import json
+
 # intitalise the flask app
 app = Flask(__name__)
 
@@ -552,5 +553,3 @@ def sequence_visualisation(rs_value):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
