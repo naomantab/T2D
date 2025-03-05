@@ -30,6 +30,7 @@ This project involves the development of a **web-based software tool** to handle
 - **Frontend:** HTML, CSS, JavaScript
 - **Backend:** Python (Flask)
 - **Database:** SQL (SQLite)
+  https://drive.google.com/drive/folders/1J-4i_U8hxD_Z2teKKpeK9lQdk0ca0Ugc?usp=sharing
 - **Data Sources:**
   - [GWAS Catalog](https://www.ebi.ac.uk/gwas)
   - [T2D Knowledge Portal](https://t2d.hugeamp.org)
