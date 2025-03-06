@@ -56,6 +56,11 @@ This project involves the development of a **web-based software tool** to handle
    ```sh
    flask run  # For Flask
    ```
+## Live Website
+As of 6th March 2025 Amazon EC2 has successfully deployed T2D at:
+
+  http://13.40.223.6:5000
+
 ## ⭐ Project Team & Acknowledgments
 
 This project is part of the **MSc Bioinformatics Software Development Group Project 2025**.  
