@@ -41,7 +41,7 @@ This project involves the development of a **web-based software tool** to handle
 ## ⚙️ Installation & Usage
   Download Database:
    ```sh
-   (https://bit.ly/t2d-db)
+   https://bit.ly/t2d-db
    ```   
 1. Clone the repository:
    ```sh
