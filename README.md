@@ -57,7 +57,7 @@ This project involves the development of a **web-based software tool** to handle
    flask run  # For Flask
    ```
 ## Live Website
-As of 6th March 2025 Amazon EC2 has successfully deployed T2D at:
+As of the 6th of March 2025 Amazon EC2 has successfully deployed T2D at:
 
   http://13.40.223.6:5000
 
