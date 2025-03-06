@@ -40,6 +40,10 @@ This project involves the development of a **web-based software tool** to handle
 
 
 ## ⚙️ Installation & Usage
+    Download Database:
+    ```sh
+    https://bit.ly/t2d-db
+    ```
 1. Clone the repository:
    ```sh
    git clone https://github.com/naomantab/T2D.git
@@ -50,11 +54,7 @@ This project involves the development of a **web-based software tool** to handle
    python -m venv env
    source env/bin/activate  # On Windows use: env\Scripts\activate
    ```
-3. Set up the database:
-   ```sh
-   flask db upgrade  # For Flask
-   ```
-4. Run the application:
+3. Run the application:
    ```sh
    flask run  # For Flask
    ```
