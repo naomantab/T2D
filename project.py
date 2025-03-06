@@ -355,8 +355,8 @@ def visualisation(rs_value):
                         )
                     )
                     # add horizontal lines (threshold, region mean)
-                    fig.add_hline(y=-2, line_color="red", annotation_text="Threshold (+2)", annotation_position="bottom left")
-                    fig.add_hline(y=2, line_color="red", annotation_text="Threshold (-2)", annotation_position="bottom left")
+                    fig.add_hline(y=-2, line_color="red", annotation_text="Threshold (-2)", annotation_position="bottom left")
+                    fig.add_hline(y=2, line_color="red", annotation_text="Threshold (+2)", annotation_position="bottom left")
                     fig.add_hline(y=region_mean, line_color="green", annotation_text="Region Mean", annotation_position="bottom left")
                     # vertical line for snp of interest
                     fig.add_vline(x=position, line=dict(color="black", width=2, dash="dash"))
