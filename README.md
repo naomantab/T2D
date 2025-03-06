@@ -32,7 +32,6 @@ This project involves the development of a **web-based software tool** to handle
 - **Database:** SQL (SQLite)
 - **Data Sources:**
   - [GWAS Catalog](https://www.ebi.ac.uk/gwas)
-  - [T2D Knowledge Portal](https://t2d.hugeamp.org)
   - [International Genome Sample Resource](https://www.internationalgenome.org/)
   - [Gene Ontology Database](https://geneontology.org/)
 - **Visualization:** Plotly
